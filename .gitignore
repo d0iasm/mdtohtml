@@ -1,3 +1,6 @@
+mdtohtml
+*.html
+
 # Binaries for programs and plugins
 *.exe
 *.exe~
