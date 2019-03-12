@@ -47,7 +47,9 @@ func main() {
 	defer wfile.Close()
 
 	writer := bufio.NewWriter(wfile)
-	fmt.Fprintln(writer, css())
+	if len(os.Args) < 3 || os.Args[2] != "-nocss" {
+		fmt.Fprintln(writer, css())
+	}
 
 	reader := bufio.NewReader(rfile)
 	mdbytes, err := ioutil.ReadAll(reader)
