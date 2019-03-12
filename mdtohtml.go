@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"strings"
 )
@@ -36,6 +37,7 @@ func preprocess(s string) string {
 }
 
 func tokenize(s string) Token {
+	fmt.Errorf(s)
 	switch {
 	case strings.HasPrefix(s, "#"):
 		n := strings.Count(s, "#")
@@ -109,16 +111,17 @@ func main() {
 	check(err)
 	defer wfile.Close()
 
-	scanner := bufio.NewScanner(rfile)
 	writer := bufio.NewWriter(wfile)
 	fmt.Fprintln(writer, css())
-	for scanner.Scan() {
-		text := preprocess(scanner.Text())
-		token := tokenize(text)
-		html := generate(token)
-		fmt.Fprintln(writer, html)
-	}
-	err = scanner.Err()
+
+	reader := bufio.NewReader(rfile)
+	mdbyte, err := ioutil.ReadAll(reader)
 	check(err)
+
+	text := preprocess(string(mdbyte))
+	token := tokenize(text)
+	html := generate(token)
+
+	fmt.Fprintln(writer, html)
 	writer.Flush()
 }
