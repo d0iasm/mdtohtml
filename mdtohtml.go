@@ -27,6 +27,11 @@ type Token struct {
 	val string
 }
 
+type Tokenizer struct {
+  i int
+  chars []rune
+}
+
 type Node struct {
 	ty       Type
 	children []Node
@@ -85,32 +90,31 @@ func check(e error) {
 	}
 }
 
-func text(i *int, chars []rune) string {
-	start := *i
-	for string(chars[*i]) != "\n" {
-		*i++
-		if *i >= len(chars) {
+func (t *Tokenizer) text() string {
+	start := t.i
+	for string(t.chars[t.i]) != "\n" {
+		t.i++
+		if t.i >= len(t.chars) {
 			break
 		}
 	}
-	return string(chars[start:*i])
+	return string(t.chars[start:t.i])
 }
 
-func tokenize(chars []rune) []Token {
-	fmt.Println(string(chars))
+func (t *Tokenizer) tokenize() []Token {
+	fmt.Println(string(t.chars))
 	tokens := []Token{}
-	i := 0
-	for i < len(chars) {
-		switch string(chars[i]) {
+	for t.i < len(t.chars) {
+		switch string(t.chars[t.i]) {
 		case "#":
 			tokens = append(tokens, Token{H1, "#"})
-			i += 2
-			tokens = append(tokens, Token{RAWTEXT, text(&i, chars)})
+			t.i += 2
+			tokens = append(tokens, Token{RAWTEXT, t.text()})
 		case "\n":
-			i++
+			t.i++
 		default:
-			tokens = append(tokens, Token{P, text(&i, chars)})
-			i++
+			tokens = append(tokens, Token{P, t.text()})
+			t.i++
 		}
 	}
 	return tokens
@@ -178,7 +182,8 @@ func main() {
 	mdchars := bytes.Runes(mdbytes)
 	check(err)
 
-	tokens := tokenize(mdchars)
+        tokenizer := &Tokenizer{0, mdchars}
+	tokens := tokenizer.tokenize()
 	fmt.Println("TOKENS: ", tokens)
 
 	parser := &Parser{0, tokens}
