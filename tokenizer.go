@@ -77,6 +77,23 @@ func (t *Tokenizer) tokenize() []Token {
 			t.i++
 			isHead = false
 			tokens = append(tokens, Token{RAWTEXT, t.rawtext()})
+                case "-":
+			if !isHead {
+				buf = append(buf, t.chars[t.i])
+				t.i++
+				break
+			}
+
+			posNextWhitespace := t.checkUntilEnd(" ")
+			if posNextWhitespace > 1 {
+				buf = append(buf, t.chars[t.i-posNextWhitespace:t.i]...)
+				break
+			}
+
+                        tokens = append(tokens, Token{LIST, "-"})
+                        t.i++
+                        isHead = false
+			tokens = append(tokens, Token{RAWTEXT, t.rawtext()})
 		case "[":
 			start := t.i
 			posEndText := t.checkUntilEnd("]")
