@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -11,7 +12,7 @@ import (
 type Type int
 
 const (
-	unknown Type = iota
+	rawtext Type = iota
 	h1
 	h2
 	h3
@@ -31,51 +32,53 @@ func check(e error) {
 	}
 }
 
-func preprocess(s string) string {
-	//TODO: Remove unused whitespaces. strings.ReplaceAll(s, " ", "") does not work well because whitespaces between words are necessary.
-	return s
+func getRawtext(i *int, chars []rune) string {
+	start := *i
+	for string(chars[*i]) != "\n" {
+		*i++
+		if *i >= len(chars) {
+			break
+		}
+	}
+	return string(chars[start:*i])
 }
 
-func tokenize(s string) Token {
-	fmt.Errorf(s)
-	switch {
-	case strings.HasPrefix(s, "#"):
-		n := strings.Count(s, "#")
-		if n == 1 {
-			return Token{h1, s[1:]}
+func tokenize(chars []rune) []Token {
+	fmt.Println(string(chars))
+	tokens := []Token{}
+	i := 0
+	for i < len(chars) {
+		switch string(chars[i]) {
+		case "#":
+			tokens = append(tokens, Token{h1, string(chars[i])})
+			i++
+			tokens = append(tokens, Token{rawtext, getRawtext(&i, chars)})
+			fmt.Println("Called #", tokens[len(tokens)-1])
+                case "\n":
+			fmt.Println("Called br", tokens[len(tokens)-1])
+                        i++
+		default:
+			tokens = append(tokens, Token{p, getRawtext(&i, chars)})
+			i++
+			fmt.Println("Called default", tokens[len(tokens)-1])
 		}
-		if n == 2 {
-			return Token{h2, s[2:]}
-		}
-		if n >= 3 {
-			return Token{h3, s[3:]}
-		}
-	case strings.HasPrefix(s, "-") || strings.HasPrefix(s, "*"):
-		return Token{li, s[1:]}
-	case len(s) == 0:
-		return Token{br, s}
-	default:
-		return Token{p, s}
 	}
-	return Token{unknown, s}
+	return tokens
 }
 
-func generate(t Token) string {
-	switch t.ty {
-	case h1:
-		return "<h1>" + t.val + "</h1>"
-	case h2:
-		return "<h2>" + t.val + "</h2>"
-	case h3:
-		return "<h3>" + t.val + "</h3>"
-	case li:
-		return "<li>" + t.val + "</li>"
-	case p:
-		return "<p>" + t.val + "</p>"
-	case br:
-		return "<br/>"
+func generate(tokens []Token) string {
+	html := ""
+	for i, t := range tokens {
+          switch t.ty {
+          case h1:
+            html += "<h1>" + tokens[i].val + "</h1>"
+          case p:
+            html += "<p>" + tokens[i].val + "</p>"
+          default:
+            html += t.val
+          }
 	}
-	return ""
+	return html
 }
 
 func css() string {
@@ -115,12 +118,12 @@ func main() {
 	fmt.Fprintln(writer, css())
 
 	reader := bufio.NewReader(rfile)
-	mdbyte, err := ioutil.ReadAll(reader)
+	mdbytes, err := ioutil.ReadAll(reader)
+	mdchars := bytes.Runes(mdbytes)
 	check(err)
 
-	text := preprocess(string(mdbyte))
-	token := tokenize(text)
-	html := generate(token)
+	tokens := tokenize(mdchars)
+	html := generate(tokens)
 
 	fmt.Fprintln(writer, html)
 	writer.Flush()
