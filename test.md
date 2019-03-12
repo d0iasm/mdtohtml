@@ -8,5 +8,5 @@ inline text[link text](http://example.com)inline text.
 C## is not heading element.
 - list1
 - list2
-- list3
+- [link](http://example.com) in list3.
 -- dummylist

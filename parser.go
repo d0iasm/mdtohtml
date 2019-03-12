@@ -36,10 +36,17 @@ func (p *Parser) list() Node {
 	n := Node{LIST, []Node{}, ""}
 	p.i++
 	t = p.tokens[p.i]
-	if t.ty != RAWTEXT {
-		panic("Token next to LIST should be rawtext.")
+	for t.ty == RAWTEXT || t.ty == LINK {
+		switch t.ty {
+		case LINK:
+			appendChild(&n, p.link())
+		case RAWTEXT:
+			appendChild(&n, p.rawtext(t.val))
+		}
+
+		p.i++
+		t = p.tokens[p.i]
 	}
-	appendChild(&n, p.rawtext(t.val))
 	return n
 }
 

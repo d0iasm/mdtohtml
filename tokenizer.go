@@ -93,7 +93,7 @@ func (t *Tokenizer) tokenize() []Token {
 			tokens = append(tokens, Token{LIST, "-"})
 			t.i++
 			isHead = false
-			tokens = append(tokens, Token{RAWTEXT, t.rawtext()})
+			shouldInline = true
 		case "[":
 			start := t.i
 			posEndText := t.checkUntilEnd("]")
