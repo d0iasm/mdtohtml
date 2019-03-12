@@ -1,6 +1,6 @@
 files=mdtohtml.go tokenizer.go parser.go generator.go
 
-mdtohtml: mdtohtml.go
+mdtohtml: $(files) 
 	go build $(files) 
 
 clean:

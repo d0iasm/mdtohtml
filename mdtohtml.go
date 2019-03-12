@@ -17,8 +17,10 @@ const (
 	H1
 	H2
 	H3
-	LI
 	P
+	LI
+	LINK
+	URL
 	BR
 )
 
