@@ -191,7 +191,7 @@ func main() {
 	fname := os.Args[1]
 	name := strings.Split(fname, ".")
 
-	if strings.Compare(strings.ToLower(name[1]), "md") != 0 {
+	if strings.Compare(strings.ToLower(name[len(name)-1]), "md") != 0 {
 		fmt.Println("Input file must be a markdown file(.md).")
 		os.Exit(1)
 	}
