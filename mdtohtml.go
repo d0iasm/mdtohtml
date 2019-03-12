@@ -46,21 +46,21 @@ func main() {
 	check(err)
 	defer wfile.Close()
 
-	writer := bufio.NewWriter(wfile)
-	if len(os.Args) < 3 || os.Args[2] != "-nocss" {
-		fmt.Fprintln(writer, css())
-	}
-
 	reader := bufio.NewReader(rfile)
 	mdbytes, err := ioutil.ReadAll(reader)
 	mdchars := bytes.Runes(mdbytes)
 	check(err)
 
-	tokenizer := &Tokenizer{0, mdchars}
+	writer := bufio.NewWriter(wfile)
+	if len(os.Args) < 3 || os.Args[2] != "-nocss" {
+		fmt.Fprintln(writer, css())
+	}
+
+	tokenizer := Tokenizer{0, mdchars}
 	tokens := tokenizer.tokenize()
 	fmt.Println("TOKENS: ", tokens)
 
-	parser := &Parser{0, tokens}
+	parser := Parser{0, tokens}
 	root := parser.body()
 	fmt.Println("NODES: ", root)
 

@@ -45,8 +45,13 @@ func (p *Parser) list() Node {
 		}
 
 		p.i++
+		if p.i >= len(p.tokens) {
+			p.i--
+			return n
+		}
 		t = p.tokens[p.i]
 	}
+	p.i--
 	return n
 }
 
