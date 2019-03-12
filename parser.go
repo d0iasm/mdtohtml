@@ -24,9 +24,36 @@ func (p *Parser) heading(level Type) Node {
 	n := Node{level, []Node{}, ""}
 	p.i++
 	t = p.tokens[p.i]
-	if t.ty == RAWTEXT {
-		appendChild(&n, p.rawtext(t.val))
+	if t.ty != RAWTEXT {
+		panic("Token next to heading should be rawtext.")
 	}
+	appendChild(&n, p.rawtext(t.val))
+	return n
+}
+
+func (p *Parser) link() Node {
+	t := p.tokens[p.i]
+	n := Node{LINK, []Node{}, ""}
+
+	p.i++
+	t = p.tokens[p.i]
+	if t.ty != URL {
+		panic("Token next to heading should be rawtext.")
+	}
+	appendChild(&n, p.url())
+
+	p.i++
+	t = p.tokens[p.i]
+	if t.ty != RAWTEXT {
+		panic("Token next to heading should be rawtext.")
+	}
+	appendChild(&n, p.rawtext(t.val))
+	return n
+}
+
+func (p *Parser) url() Node {
+	t := p.tokens[p.i]
+	n := Node{URL, []Node{}, t.val}
 	return n
 }
 
@@ -53,8 +80,12 @@ func (p *Parser) body() Node {
 			appendChild(&root, p.heading(H2))
 		case H3:
 			appendChild(&root, p.heading(H3))
+		case LINK:
+			appendChild(&root, p.link())
 		case P:
 			appendChild(&root, p.p())
+		default:
+			appendChild(&root, p.rawtext(t.val))
 		}
 		p.i++
 	}

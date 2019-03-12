@@ -72,17 +72,15 @@ func (t *Tokenizer) tokenize() []Token {
 			posEndText := t.checkUntilEnd("]")
 			posStartUrl := t.checkUntilEnd("(")
 			posEndUrl := t.checkUntilEnd(")")
-                        fmt.Println("Reach [", start, posEndText, posStartUrl, posEndUrl)
 			if posEndText != -1 && posStartUrl == 1 && posEndUrl != -1 {
 				tokens = append(tokens, Token{RAWTEXT, string(buf)})
 				buf = buf[:0]
-                                tokens = append(tokens, Token{LINK, ""})
-                                tokens = append(tokens, Token{URL, string(t.chars[start+posEndText+posStartUrl+1:t.i])})
-				tokens = append(tokens, Token{RAWTEXT, string(t.chars[start+1:start+posEndText])})
-                                t.i++
+				tokens = append(tokens, Token{LINK, ""})
+				tokens = append(tokens, Token{URL, string(t.chars[start+posEndText+posStartUrl+1 : t.i])})
+				tokens = append(tokens, Token{RAWTEXT, string(t.chars[start+1 : start+posEndText])})
+				t.i++
 			} else {
 				t.i = start + 1
-				//tokens = append(tokens, Token{RAWTEXT, t.rawtext()})
 			}
 		case "\n":
 			if len(buf) > 0 {
@@ -93,7 +91,6 @@ func (t *Tokenizer) tokenize() []Token {
 		default:
 
 			buf = append(buf, t.chars[t.i])
-			//tokens = append(tokens, Token{P, t.rawtext()})
 			t.i++
 		}
 	}
