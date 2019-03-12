@@ -75,8 +75,7 @@ func (t *Tokenizer) tokenize() []Token {
 			if posEndText != -1 && posStartUrl == 1 && posEndUrl != -1 {
 				tokens = append(tokens, Token{RAWTEXT, string(buf)})
 				buf = buf[:0]
-				tokens = append(tokens, Token{LINK, ""})
-				tokens = append(tokens, Token{URL, string(t.chars[start+posEndText+posStartUrl+1 : t.i])})
+				tokens = append(tokens, Token{LINK, string(t.chars[start+posEndText+posStartUrl+1 : t.i])})
 				tokens = append(tokens, Token{RAWTEXT, string(t.chars[start+1 : start+posEndText])})
 				t.i++
 			} else {

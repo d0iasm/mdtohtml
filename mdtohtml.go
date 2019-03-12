@@ -18,9 +18,8 @@ const (
 	H2
 	H3
 	P
-	LI
+	LIST
 	LINK
-	URL
 	BR
 )
 
