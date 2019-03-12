@@ -28,8 +28,8 @@ type Token struct {
 }
 
 type Tokenizer struct {
-  i int
-  chars []rune
+	i     int
+	chars []rune
 }
 
 type Node struct {
@@ -47,9 +47,9 @@ func appendChild(parent *Node, child Node) {
 	parent.children = append(parent.children, child)
 }
 
-func (p *Parser) h1() Node {
+func (p *Parser) heading(level Type) Node {
 	t := p.tokens[p.i]
-	n := Node{H1, []Node{}, ""}
+	n := Node{level, []Node{}, ""}
 	p.i++
 	t = p.tokens[p.i]
 	if t.ty == RAWTEXT {
@@ -69,13 +69,18 @@ func (p *Parser) rawtext(s string) Node {
 	return Node{RAWTEXT, []Node{}, s}
 }
 
-func (p *Parser) html() Node {
+func (p *Parser) body() Node {
 	root := Node{BODY, []Node{}, ""}
 	for p.i < len(p.tokens) {
 		t := p.tokens[p.i]
+		fmt.Println("Called body", t, p.i)
 		switch t.ty {
 		case H1:
-			appendChild(&root, p.h1())
+			appendChild(&root, p.heading(H1))
+		case H2:
+			appendChild(&root, p.heading(H2))
+		case H3:
+			appendChild(&root, p.heading(H3))
 		case P:
 			appendChild(&root, p.p())
 		}
@@ -107,8 +112,29 @@ func (t *Tokenizer) tokenize() []Token {
 	for t.i < len(t.chars) {
 		switch string(t.chars[t.i]) {
 		case "#":
-			tokens = append(tokens, Token{H1, "#"})
-			t.i += 2
+			fmt.Println("Found #", t.i)
+			count := 0
+			for string(t.chars[t.i]) != " " {
+				t.i++
+				count++
+				fmt.Println(t.i, count)
+				if count > 3 {
+					t.i -= count
+					tokens = append(tokens, Token{P, t.text()})
+					break
+				}
+			}
+
+			if count == 1 {
+				tokens = append(tokens, Token{H1, "#"})
+			} else if count == 2 {
+				tokens = append(tokens, Token{H2, "##"})
+			} else if count == 3 {
+				tokens = append(tokens, Token{H3, "###"})
+			} else {
+				break
+			}
+			t.i++
 			tokens = append(tokens, Token{RAWTEXT, t.text()})
 		case "\n":
 			t.i++
@@ -134,6 +160,10 @@ func generate(node Node) string {
 	switch node.ty {
 	case H1:
 		return "<h1>" + html + "</h1>"
+	case H2:
+		return "<h2>" + html + "</h2>"
+	case H3:
+		return "<h3>" + html + "</h3>"
 	case P:
 		return "<p>" + html + "</p>"
 	default:
@@ -182,12 +212,12 @@ func main() {
 	mdchars := bytes.Runes(mdbytes)
 	check(err)
 
-        tokenizer := &Tokenizer{0, mdchars}
+	tokenizer := &Tokenizer{0, mdchars}
 	tokens := tokenizer.tokenize()
 	fmt.Println("TOKENS: ", tokens)
 
 	parser := &Parser{0, tokens}
-	root := parser.html()
+	root := parser.body()
 	fmt.Println("NODES: ", root)
 
 	html := generate(root)
