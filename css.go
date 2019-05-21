@@ -8,7 +8,11 @@ body {
   font-family: 'Noto Sans', sans-serif;
   font-size: 18px;
   max-width: 740px;
-  margin: 0 auto;
+  margin: 30px auto 0 auto;
+}
+h1, h2, h3, h4, h5, h6 {
+  border-bottom: 3px black solid;
+  margin-bottom: 0;
 }
 </style>
 `
