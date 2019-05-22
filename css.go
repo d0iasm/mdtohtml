@@ -11,8 +11,10 @@ body {
   margin: 30px auto 0 auto;
 }
 h1, h2, h3, h4, h5, h6 {
-  border-bottom: 3px black solid;
   margin-bottom: 0;
+}
+h1, h2, h3 {
+  border-bottom: 3px black solid;
 }
 </style>
 `
