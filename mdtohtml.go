@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"os"
 	"strings"
@@ -50,7 +51,7 @@ func main() {
 	defer rfile.Close()
 	reader := bufio.NewReader(rfile)
 
-	t := Tokenizer{bufio.NewScanner(reader), []Token{}}
+	t := Tokenizer{bufio.NewScanner(reader), bytes.NewBufferString("")}
 	tokens := t.tokenize()
 	fmt.Println("TOKENS: ", tokens)
 

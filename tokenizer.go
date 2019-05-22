@@ -2,7 +2,8 @@ package main
 
 import (
 	"bufio"
-	"fmt"
+	"bytes"
+	//"fmt"
 	"strings"
 )
 
@@ -12,8 +13,8 @@ type Token struct {
 }
 
 type Tokenizer struct {
-	s      *bufio.Scanner
-	tokens []Token
+	s   *bufio.Scanner
+	buf *bytes.Buffer
 }
 
 /**
@@ -40,7 +41,7 @@ func (t *Tokenizer) rawtext() string {
 	return string(t.chars[start:t.i])
 }
 */
-
+/**
 func (t *Tokenizer) stringLiteral() string {
 	buf := []string{t.s.Text()}
 	for t.s.Scan() {
@@ -51,15 +52,16 @@ func (t *Tokenizer) stringLiteral() string {
 	}
 	return strings.Join(buf, "")
 }
+*/
 
 func (t *Tokenizer) checkSpace() bool {
 	if t.s.Text() == " " {
-		return t.s.Scan()
+		return true
 	}
 	return false
 }
 
-func (t *Tokenizer) countTo(target string) int {
+func (t *Tokenizer) count(target string) int {
 	n := 1
 	for t.s.Scan() {
 		if t.s.Text() == target {
@@ -77,29 +79,40 @@ func (t *Tokenizer) tokenize() []Token {
 
 	t.s.Split(bufio.ScanRunes)
 	for t.s.Scan() {
-		c := t.s.Text()
-		switch c {
+		switch t.s.Text() {
 		case "\n":
-			break
+			if t.buf.Len() <= 0 {
+				break
+			}
+			if isHead {
+				tokens = append(tokens, Token{P, t.buf.String()})
+			} else {
+				tokens = append(tokens, Token{RAWTEXT, t.buf.String()})
+			}
+			t.buf.Reset()
+			isHead = true
 		case "#":
 			if !isHead {
-				tokens = append(tokens, Token{RAWTEXT, t.stringLiteral()})
-				isHead = true
+				t.buf.WriteString(t.s.Text())
 				break
 			}
 
-			n := t.countTo("#")
+			n := t.count("#")
+			if n > 6 {
+				t.buf.WriteString(strings.Repeat("#", n))
+				break
+			}
+
 			if t.checkSpace() {
 				tokens = append(tokens, Token{HEADING, strings.Repeat("#", n)})
-				tokens = append(tokens, Token{RAWTEXT, t.stringLiteral()})
+				// TODO: Not only rawtext after heading. such as link...
+				isHead = false
 			} else {
-				tokens = append(tokens, Token{P, strings.Repeat("#", n) + t.stringLiteral()})
+				t.buf.WriteString(strings.Repeat("#", n))
+				t.buf.WriteString(t.s.Text())
 			}
-			isHead = true
 		default:
-			fmt.Println(c)
-			tokens = append(tokens, Token{P, t.stringLiteral()})
-			isHead = true
+			t.buf.WriteString(t.s.Text())
 		}
 	}
 	return tokens
