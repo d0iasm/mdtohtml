@@ -6,33 +6,17 @@ import (
 	"strings"
 )
 
-type Type int
-
-const (
-	RAWTEXT Type = iota
-	BODY
-	HEADING
-	H1
-	H2
-	H3
-	P
-	LIST
-	LINK
-	BR
-)
-
 type Token struct {
 	ty  Type
 	val string
 }
 
 type Tokenizer struct {
-	i      int
-	chars  []rune
 	s      *bufio.Scanner
 	tokens []Token
 }
 
+/**
 func (t *Tokenizer) checkUntilEnd(target string) int {
 	i := 0
 	for string(t.chars[t.i]) != "\n" {
@@ -55,6 +39,7 @@ func (t *Tokenizer) rawtext() string {
 	}
 	return string(t.chars[start:t.i])
 }
+*/
 
 func (t *Tokenizer) stringLiteral() string {
 	buf := []string{t.s.Text()}
@@ -120,6 +105,7 @@ func (t *Tokenizer) tokenize() []Token {
 	return tokens
 }
 
+/**
 func (t *Tokenizer) tokenize_old() []Token {
 	buf := []rune{}
 	tokens := []Token{}
@@ -213,3 +199,4 @@ func (t *Tokenizer) tokenize_old() []Token {
 	}
 	return tokens
 }
+*/

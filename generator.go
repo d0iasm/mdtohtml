@@ -1,7 +1,8 @@
 package main
 
 import (
-//"fmt"
+	"fmt"
+	"strings"
 )
 
 func generate(node Node) string {
@@ -16,6 +17,9 @@ func generate(node Node) string {
 	}
 
 	switch node.ty {
+	case HEADING:
+		n := strings.Count(node.val, "#")
+		return fmt.Sprintf("<h%d>%s</h%d>", n, html, n)
 	case H1:
 		return "<h1>" + html + "</h1>"
 	case H2:

@@ -19,7 +19,7 @@ echo "========== Basic Grammer =========="
 try "<h1>h1</h1>" "# h1"
 try "<h2>h2</h2>" "## h2"
 try "<h3>h3</h3>" "### h3"
-try "<p>dummyh3</p>" "###dummyh3"
+try "<p>###dummyh3</p>" "###dummyh3"
 
 rm test.md
 rm test.html

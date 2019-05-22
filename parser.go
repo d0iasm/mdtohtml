@@ -19,13 +19,25 @@ func appendChild(parent *Node, child Node) {
 	parent.children = append(parent.children, child)
 }
 
-func (p *Parser) heading(level Type) Node {
+func (p *Parser) heading() Node {
+	t := p.tokens[p.i]
+	n := Node{HEADING, []Node{}, t.val}
+	p.i++
+	t = p.tokens[p.i]
+	if t.ty != RAWTEXT {
+		panic("Token next to a heading should be a raw text.")
+	}
+	appendChild(&n, p.rawtext(t.val))
+	return n
+}
+
+func (p *Parser) headingWith(level Type) Node {
 	t := p.tokens[p.i]
 	n := Node{level, []Node{}, ""}
 	p.i++
 	t = p.tokens[p.i]
 	if t.ty != RAWTEXT {
-		panic("Token next to H1/H2/H3 should be rawtext.")
+		panic("Token next to a heading should be a raw text.")
 	}
 	appendChild(&n, p.rawtext(t.val))
 	return n
@@ -85,12 +97,14 @@ func (p *Parser) body() Node {
 		t := p.tokens[p.i]
 		//fmt.Println("Called body", t, p.i)
 		switch t.ty {
+		case HEADING:
+			appendChild(&root, p.heading())
 		case H1:
-			appendChild(&root, p.heading(H1))
+			appendChild(&root, p.headingWith(H1))
 		case H2:
-			appendChild(&root, p.heading(H2))
+			appendChild(&root, p.headingWith(H2))
 		case H3:
-			appendChild(&root, p.heading(H3))
+			appendChild(&root, p.headingWith(H3))
 		case LIST:
 			appendChild(&root, p.list())
 		case LINK:

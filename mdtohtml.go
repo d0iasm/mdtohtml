@@ -2,12 +2,24 @@ package main
 
 import (
 	"bufio"
-	"bytes"
 	"fmt"
-	"io"
-	"io/ioutil"
 	"os"
 	"strings"
+)
+
+type Type int
+
+const (
+	RAWTEXT Type = iota
+	BODY
+	HEADING
+	H1
+	H2
+	H3
+	P
+	LIST
+	LINK
+	BR
 )
 
 func check(e error) {
@@ -25,29 +37,20 @@ func main() {
 		os.Exit(1)
 	}
 
-	rfile, err := os.Open(fname)
-	check(err)
-	defer rfile.Close()
-
 	wfile, err := os.Create(name[0] + ".html")
 	check(err)
 	defer wfile.Close()
-
-	reader := bufio.NewReader(rfile)
-	mdbytes, err := ioutil.ReadAll(reader)
-	mdchars := bytes.Runes(mdbytes)
-	check(err)
-
 	writer := bufio.NewWriter(wfile)
 	if len(os.Args) < 3 || os.Args[2] != "-nocss" {
 		fmt.Fprintln(writer, css())
 	}
 
-	rfile.Seek(0, io.SeekStart)
-	reader = bufio.NewReader(rfile)
-	s := bufio.NewScanner(reader)
+	rfile, err := os.Open(fname)
+	check(err)
+	defer rfile.Close()
+	reader := bufio.NewReader(rfile)
 
-	t := Tokenizer{0, mdchars, s, []Token{}}
+	t := Tokenizer{bufio.NewScanner(reader), []Token{}}
 	tokens := t.tokenize()
 	fmt.Println("TOKENS: ", tokens)
 
