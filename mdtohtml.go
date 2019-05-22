@@ -4,23 +4,10 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"strings"
-)
-
-type Type int
-
-const (
-	RAWTEXT Type = iota
-	BODY
-	H1
-	H2
-	H3
-	P
-	LIST
-	LINK
-	BR
 )
 
 func check(e error) {
@@ -56,16 +43,20 @@ func main() {
 		fmt.Fprintln(writer, css())
 	}
 
-	tokenizer := Tokenizer{0, mdchars}
-	tokens := tokenizer.tokenize()
+	rfile.Seek(0, io.SeekStart)
+	reader = bufio.NewReader(rfile)
+	s := bufio.NewScanner(reader)
+
+	t := Tokenizer{0, mdchars, s, []Token{}}
+	tokens := t.tokenize()
 	fmt.Println("TOKENS: ", tokens)
 
-	parser := Parser{0, tokens}
-	root := parser.body()
-	fmt.Println("NODES: ", root)
+	p := Parser{0, tokens}
+	root := p.body()
+	//fmt.Println("NODES: ", root)
 
 	html := generate(root)
-	fmt.Println("HTML: ", html)
+	//fmt.Println("HTML: ", html)
 
 	fmt.Fprintln(writer, html)
 	writer.Flush()

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+//"fmt"
 )
 
 type Node struct {
@@ -83,7 +83,7 @@ func (p *Parser) body() Node {
 	root := Node{BODY, []Node{}, ""}
 	for p.i < len(p.tokens) {
 		t := p.tokens[p.i]
-		fmt.Println("Called body", t, p.i)
+		//fmt.Println("Called body", t, p.i)
 		switch t.ty {
 		case H1:
 			appendChild(&root, p.heading(H1))

@@ -1,11 +1,11 @@
 package main
 
 import (
-	"fmt"
+//"fmt"
 )
 
 func generate(node Node) string {
-	fmt.Println("Current Node", node.ty, node.val)
+	//fmt.Println("Current Node", node.ty, node.val)
 	if node.ty == RAWTEXT {
 		return node.val
 	}

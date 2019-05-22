@@ -1,7 +1,24 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"strings"
+)
+
+type Type int
+
+const (
+	RAWTEXT Type = iota
+	BODY
+	HEADING
+	H1
+	H2
+	H3
+	P
+	LIST
+	LINK
+	BR
 )
 
 type Token struct {
@@ -10,8 +27,10 @@ type Token struct {
 }
 
 type Tokenizer struct {
-	i     int
-	chars []rune
+	i      int
+	chars  []rune
+	s      *bufio.Scanner
+	tokens []Token
 }
 
 func (t *Tokenizer) checkUntilEnd(target string) int {
@@ -37,8 +56,71 @@ func (t *Tokenizer) rawtext() string {
 	return string(t.chars[start:t.i])
 }
 
+func (t *Tokenizer) stringLiteral() string {
+	buf := []string{t.s.Text()}
+	for t.s.Scan() {
+		if t.s.Text() == "\n" {
+			return strings.Join(buf, "")
+		}
+		buf = append(buf, t.s.Text())
+	}
+	return strings.Join(buf, "")
+}
+
+func (t *Tokenizer) checkSpace() bool {
+	if t.s.Text() == " " {
+		return t.s.Scan()
+	}
+	return false
+}
+
+func (t *Tokenizer) countTo(target string) int {
+	n := 1
+	for t.s.Scan() {
+		if t.s.Text() == target {
+			n++
+			continue
+		}
+		return n
+	}
+	return n
+}
+
 func (t *Tokenizer) tokenize() []Token {
-	fmt.Println(string(t.chars))
+	tokens := []Token{}
+	isHead := true
+
+	t.s.Split(bufio.ScanRunes)
+	for t.s.Scan() {
+		c := t.s.Text()
+		switch c {
+		case "\n":
+			break
+		case "#":
+			if !isHead {
+				tokens = append(tokens, Token{RAWTEXT, t.stringLiteral()})
+				isHead = true
+				break
+			}
+
+			n := t.countTo("#")
+			if t.checkSpace() {
+				tokens = append(tokens, Token{HEADING, strings.Repeat("#", n)})
+				tokens = append(tokens, Token{RAWTEXT, t.stringLiteral()})
+			} else {
+				tokens = append(tokens, Token{P, strings.Repeat("#", n) + t.stringLiteral()})
+			}
+			isHead = true
+		default:
+			fmt.Println(c)
+			tokens = append(tokens, Token{P, t.stringLiteral()})
+			isHead = true
+		}
+	}
+	return tokens
+}
+
+func (t *Tokenizer) tokenize_old() []Token {
 	buf := []rune{}
 	tokens := []Token{}
 	isHead := true
