@@ -32,6 +32,9 @@ try "<p>###dummyh3</p>" "###dummyh3"
 echo "========== List =========="
 try "<ul><li>list1</li></ul>" "- list1"
 try "<ul><li>list1</li><li>list2</li></ul>" $'- list1\n- list2'
+try "<ul><li>list1<ul><li>sublist1</li></ul></li></ul>" $'- list1\n  - sublist1'
+try "<ul><li>list1<ul><li>sublist1<ul><li>subsublist1</li></ul></li></ul></li></ul>" $'- list1\n  - sublist1\n    - subsublist1'
+try "<ul><li>list1<ul><li>sublist1</li></ul></li><li>list2</li></ul>" $'- list1\n  - sublist1\n- list2'
 try "<p>-dummylist1</p>" "-dummylist1"
 
 rm test.md

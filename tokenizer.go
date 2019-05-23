@@ -3,7 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
-	//"fmt"
+	"fmt"
 	"strings"
 )
 
@@ -13,8 +13,9 @@ type Token struct {
 }
 
 type Tokenizer struct {
-	s   *bufio.Scanner
-	buf *bytes.Buffer
+	s      *bufio.Scanner
+	buf    *bytes.Buffer
+	tokens []Token
 }
 
 /**
@@ -41,7 +42,7 @@ func (t *Tokenizer) rawtext() string {
 	return string(t.chars[start:t.i])
 }
 */
-/**
+
 func (t *Tokenizer) stringLiteral() string {
 	buf := []string{t.s.Text()}
 	for t.s.Scan() {
@@ -52,10 +53,9 @@ func (t *Tokenizer) stringLiteral() string {
 	}
 	return strings.Join(buf, "")
 }
-*/
 
-func (t *Tokenizer) checkSpace() bool {
-	if t.s.Text() == " " {
+func (t *Tokenizer) consume(target string) bool {
+	if t.s.Scan() && t.s.Text() == target {
 		return true
 	}
 	return false
@@ -73,9 +73,46 @@ func (t *Tokenizer) count(target string) int {
 	return n
 }
 
-func (t *Tokenizer) tokenize() []Token {
-	tokens := []Token{}
+func (t *Tokenizer) ul(nest int, sym string) {
+	t.tokens = append(t.tokens, Token{UL, ""})
+	t.list(nest, sym)
+	t.tokens = append(t.tokens, Token{UL_END, ""})
+}
+
+func (t *Tokenizer) list(nest int, sym string) {
+	t.tokens = append(t.tokens, Token{LIST, sym})
+	t.tokens = append(t.tokens, Token{RAWTEXT, t.stringLiteral()})
+	if t.s.Scan() {
+		t.buf.WriteString(t.s.Text())
+		switch t.s.Text() {
+		case sym:
+			fmt.Println("nest: ", nest)
+			fmt.Println("Called sym!!!", t.buf.String(), strings.Count(t.buf.String(), " "))
+
+			if strings.Count(t.buf.String(), " ") < (nest+1)*2 {
+				return
+			}
+			if t.consume(" ") {
+				t.list(nest+1, sym)
+			}
+		case " ":
+			n := t.count(" ")
+			fmt.Println("nest: ", nest)
+			fmt.Println("Called space!!!", t.buf.String(), strings.Count(t.buf.String(), " "), n)
+			if n == (nest+1)*2 && t.consume(" ") {
+				t.buf.Reset()
+				t.ul(nest+1, sym)
+			}
+		default:
+			return
+		}
+	}
+
+}
+
+func (t *Tokenizer) tokenize() {
 	isHead := true
+	//nest := 0
 
 	t.s.Split(bufio.ScanRunes)
 	for t.s.Scan() {
@@ -85,9 +122,9 @@ func (t *Tokenizer) tokenize() []Token {
 				break
 			}
 			if isHead {
-				tokens = append(tokens, Token{P, t.buf.String()})
+				t.tokens = append(t.tokens, Token{P, t.buf.String()})
 			} else {
-				tokens = append(tokens, Token{RAWTEXT, t.buf.String()})
+				t.tokens = append(t.tokens, Token{RAWTEXT, t.buf.String()})
 			}
 			t.buf.Reset()
 			isHead = true
@@ -104,28 +141,43 @@ func (t *Tokenizer) tokenize() []Token {
 				break
 			}
 
-			if t.checkSpace() {
-				tokens = append(tokens, Token{HEADING, strings.Repeat("#", n)})
+			if t.s.Text() == " " {
+				t.tokens = append(t.tokens, Token{HEADING, strings.Repeat("#", n)})
 				// TODO: Not only rawtext after heading. such as link...
 				isHead = false
 				break
 			}
 			t.buf.WriteString(strings.Repeat("#", n))
 			t.buf.WriteString(t.s.Text())
+			//nest = 0
 		case "-":
-			nest := false
-			if strings.Count(t.buf.String(), " ") == 2 {
-				t.buf.Reset()
-				nest = true
+			sym := t.s.Text()
+			if t.consume(" ") {
+				t.ul(0, sym)
 			}
-			if !isHead && !nest {
+			t.buf.WriteString(sym)
+			t.buf.WriteString(t.s.Text())
+			/**
+			fmt.Println(strings.Count(t.buf.String(), " "), nest)
+			if strings.Count(t.buf.String(), " ") < (nest+1)*2 {
+
+				t.tokens = append(t.tokens, Token{UL_END, ""})
+				nest = 0
+				break
+			}
+			if strings.Count(t.buf.String(), " ") == (nest+1)*2 {
+				t.buf.Reset()
+				nest++
+			}
+
+			if !isHead && nest == 0 {
 				t.buf.WriteString(t.s.Text())
 				break
 			}
 
 			sym := t.s.Text()
 			if t.s.Scan() && t.checkSpace() {
-				if nest || len(tokens) < 2 || tokens[len(tokens)-2].ty != LIST {
+				if nest > 0 || len(tokens) < 2 || tokens[len(tokens)-2].ty != LIST {
 					tokens = append(tokens, Token{UL, sym})
 				}
 				tokens = append(tokens, Token{LIST, sym})
@@ -134,11 +186,15 @@ func (t *Tokenizer) tokenize() []Token {
 			}
 			t.buf.WriteString(sym)
 			t.buf.WriteString(t.s.Text())
+			*/
 		default:
 			t.buf.WriteString(t.s.Text())
 		}
 	}
-	return tokens
+}
+
+func (t *Tokenizer) getTokens() []Token {
+	return t.tokens
 }
 
 /**
