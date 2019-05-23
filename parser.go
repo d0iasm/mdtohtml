@@ -46,25 +46,25 @@ func (p *Parser) ul(dep int) Node {
 			}
 			appendChild(&n, p.list(dep))
 		}
-
-		if p.tokens[p.i].dep < dep {
-			p.i--
-			return n
-		}
 	}
 	return n
 }
 
 func (p *Parser) list(dep int) Node {
 	n := Node{LIST, []Node{}, p.tokens[p.i].val}
-	p.i++
-	switch p.tokens[p.i].ty {
-	case UL:
-		appendChild(&n, p.ul(dep+1))
-	case LINK:
-		appendChild(&n, p.link())
-	case RAWTEXT:
-		appendChild(&n, p.rawtext(p.tokens[p.i].val))
+	for p.tokens[p.i].ty != EOF {
+		p.i++
+		switch p.tokens[p.i].ty {
+		case UL:
+			appendChild(&n, p.ul(dep+1))
+		case LINK:
+			appendChild(&n, p.link())
+		case RAWTEXT:
+			appendChild(&n, p.rawtext(p.tokens[p.i].val))
+		default:
+			p.i--
+			return n
+		}
 	}
 	return n
 }
