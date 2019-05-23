@@ -1,17 +1,17 @@
 # mdtohtml
 Mdtohtml is a HTML generator from a Markdown file. This is implemented in Go. The unique feature of this tool is that default result file includes CSS, but you can skip to include CSS by passing `-nocss` parameter.
 
-The syntax of Markdown follows [CommonMark](https://commonmark.org/) which version is [0.29 (2019-04-06)](https://spec.commonmark.org/).
+The syntax of Markdown follows [CommonMark](https://commonmark.org/) which version is [0.29 (2019-04-06)](https://spec.commonmark.org/). They have playground, [commonmark.js dingus](https://spec.commonmark.org/dingus/), for CommonMark grammar.
 
 ## Usage
 ```
 $ make mdtohtml & ./mdtohtml <markdown-filename>
 
 // You can avoid to generate css file with -nocss flag in order to customize style.
-$ go build mdtohtml & ./mdtohtml <markdown-filename> -nocss
+$ make mdtohtml & ./mdtohtml <markdown-filename> -nocss
 ```
 
-Current support notations (2019-05-23)
+## Current support notations (2019-05-23)
 - # This is an H1
 - ## This is an H2
 - ### This is an H3
@@ -39,4 +39,7 @@ H4 = "#" * 4, String ;
 H5 = "#" * 5, String ;
 H6 = "#" * 6, String ;
 ```
+
+## Test
+Supports tesh written in bash script. You can test this tool just by `$ make test`.
 
