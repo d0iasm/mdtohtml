@@ -120,6 +120,9 @@ func (t *Tokenizer) tokenize() []Token {
 
 			sym := t.s.Text()
 			if t.s.Scan() && t.checkSpace() {
+				if len(tokens) < 2 || tokens[len(tokens)-2].ty != LIST {
+					tokens = append(tokens, Token{UL, sym})
+				}
 				tokens = append(tokens, Token{LIST, sym})
 				isHead = false
 				break

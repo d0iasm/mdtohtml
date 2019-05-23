@@ -18,6 +18,7 @@ const (
 	H2
 	H3
 	P
+	UL
 	LIST
 	LINK
 	BR

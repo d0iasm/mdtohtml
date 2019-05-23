@@ -44,9 +44,26 @@ func (p *Parser) headingWith(level Type) Node {
 	return n
 }
 
+func (p *Parser) ul() Node {
+	n := Node{UL, []Node{}, ""}
+	p.i++
+	t := p.tokens[p.i]
+	for t.ty == LIST {
+		appendChild(&n, p.list())
+
+		if p.i++; p.i >= len(p.tokens) {
+			p.i--
+			return n
+		}
+		t = p.tokens[p.i]
+	}
+	p.i--
+	return n
+}
+
 func (p *Parser) list() Node {
 	t := p.tokens[p.i]
-	n := Node{LIST, []Node{}, ""}
+	n := Node{LIST, []Node{}, t.val}
 	p.i++
 	t = p.tokens[p.i]
 	for t.ty == RAWTEXT || t.ty == LINK {
@@ -57,8 +74,7 @@ func (p *Parser) list() Node {
 			appendChild(&n, p.rawtext(t.val))
 		}
 
-		p.i++
-		if p.i >= len(p.tokens) {
+		if p.i++; p.i >= len(p.tokens) {
 			p.i--
 			return n
 		}
@@ -106,8 +122,8 @@ func (p *Parser) body() Node {
 			appendChild(&root, p.headingWith(H2))
 		case H3:
 			appendChild(&root, p.headingWith(H3))
-		case LIST:
-			appendChild(&root, p.list())
+		case UL:
+			appendChild(&root, p.ul())
 		case LINK:
 			appendChild(&root, p.link())
 		case P:
