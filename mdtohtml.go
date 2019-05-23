@@ -57,7 +57,8 @@ func main() {
 
 	p := Parser{0, tokens}
 	root := p.body()
-	//fmt.Println("NODES: ", root)
+	debugTree(root, 0)
+	fmt.Println("NODES: ", root)
 
 	html := generate(root)
 	//fmt.Println("HTML: ", html)

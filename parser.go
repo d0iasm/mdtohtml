@@ -1,7 +1,8 @@
 package main
 
 import (
-//"fmt"
+	"fmt"
+	"strings"
 )
 
 type Node struct {
@@ -117,4 +118,16 @@ func (p *Parser) body() Node {
 		p.i++
 	}
 	return root
+}
+
+func debugTree(root Node, dep int) {
+	spaces := strings.Repeat(" ", dep*2)
+	if dep == 0 {
+		fmt.Println(spaces+"Node (type, val, dep):", root.ty, root.val, dep)
+	}
+	fmt.Println(spaces + "|")
+	for _, c := range root.children {
+		fmt.Println(spaces+"  - Node (type, val, dep):", c.ty, c.val, dep+1)
+		debugTree(c, dep+1)
+	}
 }

@@ -100,7 +100,7 @@ func (t *Tokenizer) tokenize() []Token {
 			n := t.count("#")
 			if n > 6 {
 				t.buf.WriteString(strings.Repeat("#", n))
-                                t.buf.WriteString(t.s.Text())
+				t.buf.WriteString(t.s.Text())
 				break
 			}
 
@@ -108,23 +108,24 @@ func (t *Tokenizer) tokenize() []Token {
 				tokens = append(tokens, Token{HEADING, strings.Repeat("#", n)})
 				// TODO: Not only rawtext after heading. such as link...
 				isHead = false
-			} else {
-				t.buf.WriteString(strings.Repeat("#", n))
-				t.buf.WriteString(t.s.Text())
+				break
 			}
-                      case "-", "*":
+			t.buf.WriteString(strings.Repeat("#", n))
+			t.buf.WriteString(t.s.Text())
+		case "-":
 			if !isHead {
 				t.buf.WriteString(t.s.Text())
 				break
 			}
 
-                        sym := t.s.Text()
-                        if t.s.Scan() && t.checkSpace() {
+			sym := t.s.Text()
+			if t.s.Scan() && t.checkSpace() {
 				tokens = append(tokens, Token{LIST, sym})
-                        } else {
-                          t.buf.WriteString(sym)
-                          t.buf.WriteString(t.s.Text())
-                        }
+				isHead = false
+				break
+			}
+			t.buf.WriteString(sym)
+			t.buf.WriteString(t.s.Text())
 		default:
 			t.buf.WriteString(t.s.Text())
 		}
