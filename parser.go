@@ -34,7 +34,7 @@ func (p *Parser) heading() Node {
 
 func (p *Parser) headingWith(level Type) Node {
 	t := p.tokens[p.i]
-	n := Node{level, []Node{}, ""}
+	n := Node{level, []Node{}, t.val}
 	p.i++
 	t = p.tokens[p.i]
 	if t.ty != RAWTEXT {
@@ -66,8 +66,10 @@ func (p *Parser) list() Node {
 	n := Node{LIST, []Node{}, t.val}
 	p.i++
 	t = p.tokens[p.i]
-	for t.ty == RAWTEXT || t.ty == LINK {
+	for t.ty == UL || t.ty == LINK || t.ty == RAWTEXT {
 		switch t.ty {
+		case UL:
+			appendChild(&n, p.ul())
 		case LINK:
 			appendChild(&n, p.link())
 		case RAWTEXT:

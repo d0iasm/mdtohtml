@@ -32,6 +32,7 @@ try "<p>###dummyh3</p>" "###dummyh3"
 echo "========== List =========="
 try "<ul><li>list1</li></ul>" "- list1"
 try "<ul><li>list1</li><li>list2</li></ul>" $'- list1\n- list2'
+try "<p>-dummylist1</p>" "-dummylist1"
 
 rm test.md
 rm test.html

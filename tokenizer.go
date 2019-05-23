@@ -113,14 +113,19 @@ func (t *Tokenizer) tokenize() []Token {
 			t.buf.WriteString(strings.Repeat("#", n))
 			t.buf.WriteString(t.s.Text())
 		case "-":
-			if !isHead {
+			nest := false
+			if strings.Count(t.buf.String(), " ") == 2 {
+				t.buf.Reset()
+				nest = true
+			}
+			if !isHead && !nest {
 				t.buf.WriteString(t.s.Text())
 				break
 			}
 
 			sym := t.s.Text()
 			if t.s.Scan() && t.checkSpace() {
-				if len(tokens) < 2 || tokens[len(tokens)-2].ty != LIST {
+				if nest || len(tokens) < 2 || tokens[len(tokens)-2].ty != LIST {
 					tokens = append(tokens, Token{UL, sym})
 				}
 				tokens = append(tokens, Token{LIST, sym})
