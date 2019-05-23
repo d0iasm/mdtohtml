@@ -23,6 +23,7 @@ func (t *Tokenizer) stringLiteral() string {
 	buf := []string{t.s.Text()}
 	for t.s.Scan() {
 		if t.s.Text() == "\n" {
+                  t.s.Scan()
 			return strings.Join(buf, "")
 		}
 		buf = append(buf, t.s.Text())
@@ -32,6 +33,7 @@ func (t *Tokenizer) stringLiteral() string {
 
 func (t *Tokenizer) consume(target string) bool {
 	if t.s.Scan() && t.s.Text() == target {
+          t.s.Scan()
 		return true
 	}
 	return false
@@ -60,9 +62,8 @@ func (t *Tokenizer) ul(dep int, sym string) {
 }
 
 func (t *Tokenizer) list(dep int, sym string) {
-	t.tokens = append(t.tokens, Token{LIST, sym, dep+1})
-	t.tokens = append(t.tokens, Token{RAWTEXT, t.stringLiteral(), dep+2})
-	t.consume("\n")
+	t.tokens = append(t.tokens, Token{LIST, sym, dep})
+	t.tokens = append(t.tokens, Token{RAWTEXT, t.stringLiteral(), dep})
 
 	for i := 0; i < (dep * 2); i++ {
 		t.buf.WriteString(t.s.Text())
