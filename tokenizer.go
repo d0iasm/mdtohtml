@@ -10,6 +10,7 @@ import (
 type Token struct {
 	ty  Type
 	val string
+        dep int
 }
 
 type Tokenizer struct {
@@ -48,22 +49,22 @@ func (t *Tokenizer) count(target string) int {
 	return n
 }
 
-func (t *Tokenizer) ul(nest int, sym string) {
-	t.tokens = append(t.tokens, Token{UL, ""})
-	t.list(nest, sym)
-	t.tokens = append(t.tokens, Token{UL_END, ""})
+func (t *Tokenizer) ul(dep int, sym string) {
+	t.tokens = append(t.tokens, Token{UL, "", dep})
+	t.list(dep, sym)
+	t.tokens = append(t.tokens, Token{UL_END, "", dep})
 	if t.buf.String() == sym+" " {
 		t.buf.Reset()
-		t.list(nest, sym)
+		t.list(dep-1, sym)
 	}
 }
 
-func (t *Tokenizer) list(nest int, sym string) {
-	t.tokens = append(t.tokens, Token{LIST, sym})
-	t.tokens = append(t.tokens, Token{RAWTEXT, t.stringLiteral()})
+func (t *Tokenizer) list(dep int, sym string) {
+	t.tokens = append(t.tokens, Token{LIST, sym, dep+1})
+	t.tokens = append(t.tokens, Token{RAWTEXT, t.stringLiteral(), dep+2})
 	t.consume("\n")
 
-	for i := 0; i < (nest * 2); i++ {
+	for i := 0; i < (dep * 2); i++ {
 		t.buf.WriteString(t.s.Text())
 		if !t.s.Scan() {
 			return
@@ -73,14 +74,14 @@ func (t *Tokenizer) list(nest int, sym string) {
 	switch t.s.Text() {
 	case sym:
 		if t.consume(" ") {
-			t.list(nest, sym)
+			t.list(dep, sym)
 		}
 	case " ":
 		n := t.count(" ")
 		t.buf.WriteString(strings.Repeat(" ", n))
-		if n == (nest+1)*2 {
+		if n == (dep+1)*2 {
 			t.buf.Reset()
-			t.ul(nest+1, sym)
+			t.ul(dep+1, sym)
 		}
 	}
 }
@@ -95,9 +96,9 @@ func (t *Tokenizer) tokenize() {
 				break
 			}
 			if isHead {
-				t.tokens = append(t.tokens, Token{P, t.buf.String()})
+				t.tokens = append(t.tokens, Token{P, t.buf.String(), -1})
 			} else {
-				t.tokens = append(t.tokens, Token{RAWTEXT, t.buf.String()})
+				t.tokens = append(t.tokens, Token{RAWTEXT, t.buf.String(), -1})
 			}
 			t.buf.Reset()
 			isHead = true
@@ -115,7 +116,7 @@ func (t *Tokenizer) tokenize() {
 			}
 
 			if t.s.Text() == " " {
-				t.tokens = append(t.tokens, Token{HEADING, strings.Repeat("#", n)})
+				t.tokens = append(t.tokens, Token{HEADING, strings.Repeat("#", n), -1})
 				// TODO: Not only rawtext after heading. such as link...
 				isHead = false
 				break

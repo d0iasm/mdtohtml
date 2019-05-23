@@ -19,6 +19,7 @@ const (
 	UL_END
 	LIST
 	LINK
+        EOF
 )
 
 func check(e error) {

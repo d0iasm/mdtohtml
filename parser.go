@@ -37,52 +37,83 @@ func (p *Parser) ul() Node {
 	n := Node{UL, []Node{}, ""}
 	p.i++
 	t := p.tokens[p.i]
+	if t.ty == UL_END {
+		fmt.Println("UL end !!!!!!!!!!!!!11 : ", p.i, p.tokens[p.i], n)
+	}
+	for t.ty == UL || t.ty == LIST {
+          switch t.ty {
+		case UL:
+			appendChild(&n, p.ul())
+		case LIST:
+			appendChild(&n, p.list())
+		}
+        
+		if p.i+1 < len(p.tokens) && p.tokens[p.i+1].ty == UL_END {
+		fmt.Println("!!!!!!!!!UL end !!!!!!!!!!!!!11 : ", p.i, p.tokens[p.i], n)
+			p.i++
+		}
+		if p.i++; p.i >= len(p.tokens) {
+			return n
+		}
+		t = p.tokens[p.i]
+        }
+
+        /**
 	for t.ty == UL || t.ty == LIST {
 		fmt.Println("UL: ", p.i, p.tokens[p.i], n)
 		switch t.ty {
 		case UL:
 			appendChild(&n, p.ul())
 		case LIST:
-			appendChild(&n, p.list(n))
+			appendChild(&n, p.list())
 		}
 
+                if p.i < len(p.tokens) && p.tokens[p.i].ty == UL_END {
+                  return n
+                }
+
 		if p.i++; p.i >= len(p.tokens) {
-			p.i--
 			return n
 		}
 		t = p.tokens[p.i]
 	}
-	p.i--
+        */
 	return n
 }
 
-func (p *Parser) list(parent Node) Node {
+func (p *Parser) list() Node {
 	fmt.Println("LIST: ", p.i, p.tokens[p.i])
 	t := p.tokens[p.i]
 	n := Node{LIST, []Node{}, t.val}
 	p.i++
 	t = p.tokens[p.i]
-	for t.ty == UL || t.ty == UL_END || t.ty == LINK || t.ty == RAWTEXT {
+		if t.ty == UL_END {
+			fmt.Println("LIST end !!!!!!!!!!!!!11 : ", p.i, p.tokens[p.i], n)
+		}
+	//for t.ty == UL || t.ty == UL_END || t.ty == LINK || t.ty == RAWTEXT {
+	for t.ty == UL || t.ty == LINK || t.ty == RAWTEXT {
 		fmt.Println("LIST: ", p.i, p.tokens[p.i], n)
 		switch t.ty {
 		case UL:
 			appendChild(&n, p.ul())
-		case UL_END:
-			appendChild(&parent, n)
-			return n
 		case LINK:
 			appendChild(&n, p.link())
 		case RAWTEXT:
 			appendChild(&n, p.rawtext(t.val))
 		}
 
+		//fmt.Println("after LIST: ", p.i, p.tokens[p.i], n)
+
+		if p.i+1 < len(p.tokens) && p.tokens[p.i+1].ty == UL_END {
+		fmt.Println("!!!!!!!!!LINK end !!!!!!!!!!!!!11 : ", p.i, p.tokens[p.i], n)
+			return n
+		}
+
 		if p.i++; p.i >= len(p.tokens) {
-			p.i--
 			return n
 		}
 		t = p.tokens[p.i]
 	}
-	p.i--
 	return n
 }
 
@@ -119,8 +150,13 @@ func (p *Parser) body() Node {
 		case HEADING:
 			appendChild(&root, p.heading())
 		case UL:
-			fmt.Println("root UL: ", p.i, p.tokens[p.i])
+			fmt.Println("called root UL: ", p.i, root)
 			appendChild(&root, p.ul())
+		case UL_END:
+			fmt.Println("called root UL_END: ", p.i, root)
+			break
+		case LIST:
+			appendChild(&root, p.list())
 		case LINK:
 			appendChild(&root, p.link())
 		case P:
