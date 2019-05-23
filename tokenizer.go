@@ -54,19 +54,28 @@ func (t *Tokenizer) count(target string) int {
 func (t *Tokenizer) ul(dep int, sym string) {
 	t.tokens = append(t.tokens, Token{UL, "", dep})
 	t.list(dep, sym)
-	if t.buf.String() == sym+" " {
+	if t.buf.String() == strings.Repeat(" ", (dep*2))+sym+" " {
+                fmt.Println("FIND:", sym+" ", dep)
 		t.buf.Reset()
-		t.list(dep-1, sym)
+		  t.list(dep, sym)
 	}
 }
 
 func (t *Tokenizer) list(dep int, sym string) {
-  fmt.Println("current: ", t.s.Text())
 	t.tokens = append(t.tokens, Token{LIST, sym, dep})
 	t.tokens = append(t.tokens, Token{RAWTEXT, t.stringLiteral(), dep})
 
+        fmt.Println("==============:")
 	for i := 0; i < (dep * 2); i++ {
 		t.buf.WriteString(t.s.Text())
+                fmt.Println("buf:", t.buf.String(), dep, i)
+                fmt.Println("target:", strings.Repeat(" ", i)+sym+" ", dep, i)
+	        if t.buf.String() == strings.Repeat(" ", i)+sym+" " {
+                fmt.Println("FIND:", sym+" ", dep, i)
+		t.buf.Reset()
+                  t.consume(" ")
+		  t.list(i-1, sym)
+	        }
 		if !t.s.Scan() {
 			return
 		}
@@ -81,8 +90,8 @@ func (t *Tokenizer) list(dep int, sym string) {
 	case " ":
 		n := t.count(" ")
 		t.buf.WriteString(strings.Repeat(" ", n))
-		if n == (dep+1)*2 {
-                        if t.s.Text() != "-" {
+		if n == 2 {
+                        if t.s.Text() != sym {
                           t.buf.WriteString(t.s.Text())
                           return
                         }
