@@ -3,7 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
-	//"fmt"
+	"fmt"
 	"strings"
 )
 
@@ -54,7 +54,6 @@ func (t *Tokenizer) count(target string) int {
 func (t *Tokenizer) ul(dep int, sym string) {
 	t.tokens = append(t.tokens, Token{UL, "", dep})
 	t.list(dep, sym)
-	t.tokens = append(t.tokens, Token{UL_END, "", dep})
 	if t.buf.String() == sym+" " {
 		t.buf.Reset()
 		t.list(dep-1, sym)
@@ -62,6 +61,7 @@ func (t *Tokenizer) ul(dep int, sym string) {
 }
 
 func (t *Tokenizer) list(dep int, sym string) {
+  fmt.Println("current: ", t.s.Text())
 	t.tokens = append(t.tokens, Token{LIST, sym, dep})
 	t.tokens = append(t.tokens, Token{RAWTEXT, t.stringLiteral(), dep})
 
@@ -75,12 +75,21 @@ func (t *Tokenizer) list(dep int, sym string) {
 	switch t.s.Text() {
 	case sym:
 		if t.consume(" ") {
+			t.buf.Reset()
 			t.list(dep, sym)
 		}
 	case " ":
 		n := t.count(" ")
 		t.buf.WriteString(strings.Repeat(" ", n))
 		if n == (dep+1)*2 {
+                        if t.s.Text() != "-" {
+                          t.buf.WriteString(t.s.Text())
+                          return
+                        }
+                        if !t.consume(" ") {
+                          t.buf.WriteString(t.s.Text())
+                          return
+                        }
 			t.buf.Reset()
 			t.ul(dep+1, sym)
 		}
@@ -136,6 +145,8 @@ func (t *Tokenizer) tokenize() {
 			t.buf.WriteString(t.s.Text())
 		}
 	}
+
+        t.tokens = append(t.tokens, Token{EOF, "", -1})
 }
 
 func (t *Tokenizer) getTokens() []Token {
