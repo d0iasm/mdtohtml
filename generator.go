@@ -20,12 +20,6 @@ func generate(node Node) string {
 	case HEADING:
 		n := strings.Count(node.val, "#")
 		return fmt.Sprintf("<h%d>%s</h%d>", n, html, n)
-	case H1:
-		return "<h1>" + html + "</h1>"
-	case H2:
-		return "<h2>" + html + "</h2>"
-	case H3:
-		return "<h3>" + html + "</h3>"
 	case UL:
 		return "<ul>" + html + "</ul>"
 	case LIST:

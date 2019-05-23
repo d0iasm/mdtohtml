@@ -8,7 +8,6 @@ import (
 type Node struct {
 	ty       Type
 	children []Node
-        parent Node
 	val      string
 }
 
@@ -32,67 +31,6 @@ func (p *Parser) heading() Node {
 	appendChild(&n, p.rawtext(t.val))
 	return n
 }
-
-func (p *Parser) headingWith(level Type) Node {
-	t := p.tokens[p.i]
-	n := Node{level, []Node{}, t.val}
-	p.i++
-	t = p.tokens[p.i]
-	if t.ty != RAWTEXT {
-		panic("Token next to a heading should be a raw text.")
-	}
-	appendChild(&n, p.rawtext(t.val))
-	return n
-}
-
-/**
-func (p *Parser) ul(parent Node) Node {
-	fmt.Println("UL: ", p.i, p.tokens[p.i])
-	n := Node{UL, []Node{}, ""}
-	p.i++
-	t := p.tokens[p.i]
-	for t.ty == UL || t.ty == LIST {
-		if p.i++; p.i >= len(p.tokens) {
-			return n
-		}
-
-		switch t.ty {
-		case UL:
-			appendChild(&n, p.ul(n))
-		case LIST:
-			appendChild(&n, p.list(n))
-		}
-		if p.i++; p.i >= len(p.tokens) {
-			p.i--
-			return n
-		}
-		t = p.tokens[p.i]
-	}
-                return n
-}
-
-func (p *Parser) list(parent Node) Node {
-	fmt.Println("LIST: ", p.i, p.tokens[p.i])
-	n := Node{LIST, []Node{}, ""}
-		if p.i++; p.i >= len(p.tokens) {
-			return n
-		}
-
-                t := p.tokens[p.i]
-		switch t.ty {
-		case UL:
-			appendChild(&n, p.ul(n))
-		case UL_END:
-                        appendChild(&parent, n)
-			return n
-		case LINK:
-			appendChild(&n, p.link())
-		case RAWTEXT:
-			appendChild(&n, p.rawtext(t.val))
-		}
-                return n
-}
-*/
 
 func (p *Parser) ul() Node {
 	fmt.Println("UL: ", p.i, p.tokens[p.i])
@@ -187,12 +125,6 @@ func (p *Parser) body() Node {
 			appendChild(&root, p.link())
 		case P:
 			appendChild(&root, p.p())
-		case H1:
-			appendChild(&root, p.headingWith(H1))
-		case H2:
-			appendChild(&root, p.headingWith(H2))
-		case H3:
-			appendChild(&root, p.headingWith(H3))
 		default:
 			appendChild(&root, p.rawtext(t.val))
 		}

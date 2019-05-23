@@ -19,10 +19,6 @@ const (
 	UL_END
 	LIST
 	LINK
-	BR
-	H1
-	H2
-	H3
 )
 
 func check(e error) {
