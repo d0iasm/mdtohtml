@@ -3,7 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
-	//"fmt"
+	"fmt"
 	"strings"
 )
 
@@ -56,6 +56,7 @@ func (t *Tokenizer) ul(dep int, sym string) {
 	t.list(dep, sym)
 	// Check if an unnested list exists or not.
 	if t.buf.String() == strings.Repeat(" ", (dep*2))+sym+" " {
+		fmt.Println("ul0", t.buf.String())
 		t.buf.Reset()
 		t.list(dep, sym)
 	}
@@ -67,36 +68,51 @@ func (t *Tokenizer) list(dep int, sym string) {
 
 	// Move whitespaces to a buffer.
 	for i := 0; i < (dep * 2); i++ {
+		fmt.Println("li0", i, t.buf.String())
 		t.buf.WriteString(t.s.Text())
 		if t.buf.String() == strings.Repeat(" ", i*2)+sym {
 			t.buf.Reset()
-			t.consume(" ")
-			t.list(i, sym)
+			if t.consume(" ") {
+				t.list(i, sym)
+			} else {
+				t.buf.WriteString(sym)
+			}
 		}
 		if !t.s.Scan() {
 			return
 		}
 	}
 
+	fmt.Println("li1", t.buf.String())
 	switch t.s.Text() {
 	case sym:
+		fmt.Println("li2", t.buf.String())
 		if t.consume(" ") {
 			t.buf.Reset()
 			t.list(dep, sym)
+		} else {
+			t.buf.WriteString(sym)
 		}
 	case " ":
+		fmt.Println("li3", t.buf.String())
 		n := t.count(" ")
 		t.buf.WriteString(strings.Repeat(" ", n))
 		if n == 2 {
+			t.buf.Reset()
 			if t.s.Text() != sym {
+				fmt.Println("li4", t.buf.String())
+				t.buf.WriteString(" ")
 				t.buf.WriteString(t.s.Text())
 				return
 			}
 			if !t.consume(" ") {
+				t.buf.WriteString(" ")
+				t.buf.WriteString(sym)
 				t.buf.WriteString(t.s.Text())
+				fmt.Println("li5", t.buf.String(), t.s.Text())
 				return
 			}
-			t.buf.Reset()
+			fmt.Println("li6", t.buf.String(), t.s.Text())
 			t.ul(dep+1, sym)
 		}
 	}
@@ -141,8 +157,11 @@ func (t *Tokenizer) tokenize() {
 			t.buf.WriteString(t.s.Text())
 		case "-":
 			sym := t.s.Text()
+			fmt.Println("main", t.buf.String(), sym)
 			if t.consume(" ") {
+				fmt.Println("main2", t.buf.String(), sym)
 				t.ul(0, sym)
+				isHead = false
 				break
 			}
 			t.buf.WriteString(sym)

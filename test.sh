@@ -38,6 +38,7 @@ try "<ul><li>list1<ul><li>sublist1</li></ul></li><li>list2</li></ul>" $'- list1\
 try "<ul><li>a<ul><li>aa<ul><li>aaa</li></ul></li></ul></li><li>b</li></ul>" $'- a\n  - aa\n    - aaa\n- b'
 try "<ul><li>a<ul><li>aa<ul><li>aaa</li></ul></li><li>bb</li></ul></li></ul>" $'- a\n  - aa\n    - aaa\n  - bb'
 try "<p>-dummylist1</p>" "-dummylist1"
+try "<ul><li>a -b</li><li>c</li></ul>" $'- a\n  -b\n- c'
 
 rm test.md
 rm test.html
