@@ -8,6 +8,7 @@ import (
 type Node struct {
 	ty       Type
 	children []Node
+        parent Node
 	val      string
 }
 
@@ -44,12 +45,68 @@ func (p *Parser) headingWith(level Type) Node {
 	return n
 }
 
-func (p *Parser) ul() Node {
+/**
+func (p *Parser) ul(parent Node) Node {
+	fmt.Println("UL: ", p.i, p.tokens[p.i])
 	n := Node{UL, []Node{}, ""}
 	p.i++
 	t := p.tokens[p.i]
-	for t.ty == LIST {
-		appendChild(&n, p.list())
+	for t.ty == UL || t.ty == LIST {
+		if p.i++; p.i >= len(p.tokens) {
+			return n
+		}
+
+		switch t.ty {
+		case UL:
+			appendChild(&n, p.ul(n))
+		case LIST:
+			appendChild(&n, p.list(n))
+		}
+		if p.i++; p.i >= len(p.tokens) {
+			p.i--
+			return n
+		}
+		t = p.tokens[p.i]
+	}
+                return n
+}
+
+func (p *Parser) list(parent Node) Node {
+	fmt.Println("LIST: ", p.i, p.tokens[p.i])
+	n := Node{LIST, []Node{}, ""}
+		if p.i++; p.i >= len(p.tokens) {
+			return n
+		}
+
+                t := p.tokens[p.i]
+		switch t.ty {
+		case UL:
+			appendChild(&n, p.ul(n))
+		case UL_END:
+                        appendChild(&parent, n)
+			return n
+		case LINK:
+			appendChild(&n, p.link())
+		case RAWTEXT:
+			appendChild(&n, p.rawtext(t.val))
+		}
+                return n
+}
+*/
+
+func (p *Parser) ul() Node {
+	fmt.Println("UL: ", p.i, p.tokens[p.i])
+	n := Node{UL, []Node{}, ""}
+	p.i++
+	t := p.tokens[p.i]
+	for t.ty == UL || t.ty == LIST {
+		fmt.Println("UL: ", p.i, p.tokens[p.i], n)
+		switch t.ty {
+		case UL:
+			appendChild(&n, p.ul())
+		case LIST:
+			appendChild(&n, p.list(n))
+		}
 
 		if p.i++; p.i >= len(p.tokens) {
 			p.i--
@@ -61,15 +118,20 @@ func (p *Parser) ul() Node {
 	return n
 }
 
-func (p *Parser) list() Node {
+func (p *Parser) list(parent Node) Node {
+	fmt.Println("LIST: ", p.i, p.tokens[p.i])
 	t := p.tokens[p.i]
 	n := Node{LIST, []Node{}, t.val}
 	p.i++
 	t = p.tokens[p.i]
-	for t.ty == UL || t.ty == LINK || t.ty == RAWTEXT {
+	for t.ty == UL || t.ty == UL_END || t.ty == LINK || t.ty == RAWTEXT {
+		fmt.Println("LIST: ", p.i, p.tokens[p.i], n)
 		switch t.ty {
 		case UL:
 			appendChild(&n, p.ul())
+		case UL_END:
+			appendChild(&parent, n)
+			return n
 		case LINK:
 			appendChild(&n, p.link())
 		case RAWTEXT:
@@ -118,18 +180,19 @@ func (p *Parser) body() Node {
 		switch t.ty {
 		case HEADING:
 			appendChild(&root, p.heading())
+		case UL:
+			fmt.Println("root UL: ", p.i, p.tokens[p.i])
+			appendChild(&root, p.ul())
+		case LINK:
+			appendChild(&root, p.link())
+		case P:
+			appendChild(&root, p.p())
 		case H1:
 			appendChild(&root, p.headingWith(H1))
 		case H2:
 			appendChild(&root, p.headingWith(H2))
 		case H3:
 			appendChild(&root, p.headingWith(H3))
-		case UL:
-			appendChild(&root, p.ul())
-		case LINK:
-			appendChild(&root, p.link())
-		case P:
-			appendChild(&root, p.p())
 		default:
 			appendChild(&root, p.rawtext(t.val))
 		}

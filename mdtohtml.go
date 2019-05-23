@@ -14,14 +14,15 @@ const (
 	RAWTEXT Type = iota
 	BODY
 	HEADING
-	H1
-	H2
-	H3
 	P
 	UL
+	UL_END
 	LIST
 	LINK
 	BR
+	H1
+	H2
+	H3
 )
 
 func check(e error) {
@@ -52,9 +53,10 @@ func main() {
 	defer rfile.Close()
 	reader := bufio.NewReader(rfile)
 
-	t := Tokenizer{bufio.NewScanner(reader), bytes.NewBufferString("")}
-	tokens := t.tokenize()
-	fmt.Println("TOKENS: ", tokens)
+	t := Tokenizer{bufio.NewScanner(reader), bytes.NewBufferString(""), []Token{}}
+	t.tokenize()
+	tokens := t.getTokens()
+	fmt.Println("TOKENS: ", t.tokens)
 
 	p := Parser{0, tokens}
 	root := p.body()

@@ -77,35 +77,40 @@ func (t *Tokenizer) ul(nest int, sym string) {
 	t.tokens = append(t.tokens, Token{UL, ""})
 	t.list(nest, sym)
 	t.tokens = append(t.tokens, Token{UL_END, ""})
+	if t.buf.String() == sym+" " {
+		t.buf.Reset()
+		t.list(nest, sym)
+	}
 }
 
 func (t *Tokenizer) list(nest int, sym string) {
 	t.tokens = append(t.tokens, Token{LIST, sym})
 	t.tokens = append(t.tokens, Token{RAWTEXT, t.stringLiteral()})
-	if t.s.Scan() {
-		t.buf.WriteString(t.s.Text())
-		switch t.s.Text() {
-		case sym:
-			fmt.Println("nest: ", nest)
-			fmt.Println("Called sym!!!", t.buf.String(), strings.Count(t.buf.String(), " "))
+	t.consume("\n")
 
-			if strings.Count(t.buf.String(), " ") < (nest+1)*2 {
-				return
-			}
-			if t.consume(" ") {
-				t.list(nest+1, sym)
-			}
-		case " ":
-			n := t.count(" ")
-			fmt.Println("nest: ", nest)
-			fmt.Println("Called space!!!", t.buf.String(), strings.Count(t.buf.String(), " "), n)
-			if n == (nest+1)*2 && t.consume(" ") {
-				t.buf.Reset()
-				t.ul(nest+1, sym)
-			}
-		default:
+	for i := 0; i < (nest * 2); i++ {
+		t.buf.WriteString(t.s.Text())
+		if !t.s.Scan() {
 			return
 		}
+	}
+
+	fmt.Println(t.buf.String(), t.s.Text(), sym, nest)
+
+	switch t.s.Text() {
+	case sym:
+		if t.consume(" ") {
+			t.list(nest, sym)
+		}
+	case " ":
+		n := t.count(" ")
+		t.buf.WriteString(strings.Repeat(" ", n))
+		if n == (nest+1)*2 {
+			t.buf.Reset()
+			t.ul(nest+1, sym)
+		}
+	default:
+		return
 	}
 
 }
@@ -154,6 +159,7 @@ func (t *Tokenizer) tokenize() {
 			sym := t.s.Text()
 			if t.consume(" ") {
 				t.ul(0, sym)
+				break
 			}
 			t.buf.WriteString(sym)
 			t.buf.WriteString(t.s.Text())
