@@ -1,42 +1,42 @@
 # mdtohtml
-Generate a html file and a css file from a markdown file by Go.
+Mdtohtml is a HTML generator from a Markdown file. This is implemented in Go. The unique feature of this tool is that default result file includes CSS, but you can skip to include CSS by passing `-nocss` parameter.
 
+The syntax of Markdown follows [CommonMark](https://commonmark.org/) which version is [0.29 (2019-04-06)](https://spec.commonmark.org/).
+
+## Usage
 ```
-$ go build mdtohtml & ./mdtohtml <markdown-filename>
+$ make mdtohtml & ./mdtohtml <markdown-filename>
 
 // You can avoid to generate css file with -nocss flag in order to customize style.
 $ go build mdtohtml & ./mdtohtml <markdown-filename> -nocss
 ```
 
-Current support notations (03/12/2019)
-- #: h1
-- ##: h2
-- ###: h3
+Current support notations (2019-05-23)
+- # This is an H1
+- ## This is an H2
+- ### This is an H3
+- #### This is an H4
+- ##### This is an H5
+- ###### This is an H6
+- List
+- Nested sublist
+- Paragraph text.
 - \[text\]\(url\): \<a href="url"\>text\</a\>
-- inline/block text
 
-## BNF(Backus-Naur form)
+## EBNF
+Entended Backus-Naur form for Markdown grammer.
 ```
-<html> ::= <html> | <h1> | <h2> | <h3> | <ul> | <p> | <br>
-
-<h1> ::= "# " <rawtext> <newline>
-<h2> ::= "## " <rawtext> <newline>
-<h3> ::= "### " <rawtext> <newline>
-<ul> ::= <li>
-<li> ::= <li> <li> | <li> <ul>
-<li> ::= "- " <rawtext> <newline> | "* " <rawtext> <newline>
-<p> ::= <rawtext> <newline>
-<link> ::= <url> "(" <rawtext> ")"
-<url> ::= "[" <rawtext> "]"
-<br> ::= <newline>
-<i> ::= "*" <rawtext> "*"| "_" <rawtext> "_" 
-<b> ::= "**" <rawtext> "**" | "__" <rawtext> "__" 
-<text> :: = <text> | <b> | <i> | <link> | <rawtext> 
-
-<rawtext> ::= <character> | <rawtext> 
-<character> ::= <letter> | <digit> | <symbol>
-<letter> ::= "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z" | "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z"
-<digit> ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
-<symbol> ::= "#" | "*" | "-" | "[" | "]" | "(" | ")"  
-<newline> ::= "\n" | "\r\n"
+Document = { Block }, EOF ;
+Block = Paragraph | Headings | List ;
+Paragraph = String, { String }, Newline ;
+Lists = List, (List | Lists)* ;
+List = ((" ")*, "-", " ", Paragraph) | Lists ;
+Newline = "\n" ;
+H1 = "#", String ;
+H2 = "#" * 2, String ;
+H3 = "#" * 3, String ;
+H4 = "#" * 4, String ;
+H5 = "#" * 5, String ;
+H6 = "#" * 6, String ;
 ```
+
