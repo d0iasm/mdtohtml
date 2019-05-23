@@ -33,25 +33,22 @@ func (p *Parser) heading() Node {
 }
 
 func (p *Parser) ul(dep int) Node {
-	//fmt.Println("UL:", p.i, p.tokens[p.i], p.tokens[p.i].dep, dep)
 	n := Node{UL, []Node{}, ""}
 	for p.tokens[p.i].ty != EOF {
-	p.i++
-		fmt.Println(strings.Repeat(" ", dep) + "ul:", p.i, p.tokens[p.i], p.tokens[p.i].dep, dep)
+		p.i++
 		switch p.tokens[p.i].ty {
 		case UL:
 			appendChild(&n, p.ul(dep+1))
 		case LIST:
 			if p.tokens[p.i].dep < dep {
-                          p.i--
-				fmt.Println("111111 RETURN UL:", p.i, p.tokens[p.i], p.tokens[p.i].dep, dep)
+				p.i--
 				return n
 			}
 			appendChild(&n, p.list(dep))
 		}
 
 		if p.tokens[p.i].dep < dep {
-			fmt.Println("RETURN UL:", p.i, p.tokens[p.i], p.tokens[p.i].dep, dep)
+			p.i--
 			return n
 		}
 	}
@@ -59,10 +56,8 @@ func (p *Parser) ul(dep int) Node {
 }
 
 func (p *Parser) list(dep int) Node {
-	//fmt.Println("LIST:", p.i, p.tokens[p.i], p.tokens[p.i].dep, dep)
 	n := Node{LIST, []Node{}, p.tokens[p.i].val}
 	p.i++
-	fmt.Println(strings.Repeat(" ", dep) + "list:", p.i, p.tokens[p.i], p.tokens[p.i].dep, dep)
 	switch p.tokens[p.i].ty {
 	case UL:
 		appendChild(&n, p.ul(dep+1))
@@ -106,12 +101,13 @@ func (p *Parser) body() Node {
 		case HEADING:
 			appendChild(&root, p.heading())
 		case UL:
-			fmt.Println("called root UL: ", p.i, root)
 			appendChild(&root, p.ul(0))
 		case LINK:
 			appendChild(&root, p.link())
 		case P:
 			appendChild(&root, p.p())
+		case EOF:
+			return root
 		default:
 			appendChild(&root, p.rawtext(t.val))
 		}

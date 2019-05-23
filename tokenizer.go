@@ -68,6 +68,11 @@ func (t *Tokenizer) list(dep int, sym string) {
 	// Move whitespaces to a buffer.
 	for i := 0; i < (dep * 2); i++ {
 		t.buf.WriteString(t.s.Text())
+		if t.buf.String() == strings.Repeat(" ", i*2)+sym {
+			t.buf.Reset()
+			t.consume(" ")
+			t.list(i, sym)
+		}
 		if !t.s.Scan() {
 			return
 		}
