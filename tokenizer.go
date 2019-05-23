@@ -54,6 +54,7 @@ func (t *Tokenizer) count(target string) int {
 func (t *Tokenizer) ul(dep int, sym string) {
 	t.tokens = append(t.tokens, Token{UL, "", dep})
 	t.list(dep, sym)
+      // Check if an unnested list exists or not.
 	if t.buf.String() == strings.Repeat(" ", (dep*2))+sym+" " {
 		t.buf.Reset()
 		t.list(dep, sym)
@@ -64,6 +65,7 @@ func (t *Tokenizer) list(dep int, sym string) {
 	t.tokens = append(t.tokens, Token{LIST, sym, dep})
 	t.tokens = append(t.tokens, Token{RAWTEXT, t.stringLiteral(), dep})
 
+        // Move whitespaces to a buffer.
 	for i := 0; i < (dep * 2); i++ {
 		t.buf.WriteString(t.s.Text())
 		if !t.s.Scan() {

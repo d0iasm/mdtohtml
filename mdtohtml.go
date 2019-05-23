@@ -16,7 +16,6 @@ const (
 	HEADING
 	P
 	UL
-	UL_END
 	LIST
 	LINK
         EOF
