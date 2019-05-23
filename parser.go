@@ -33,49 +33,43 @@ func (p *Parser) heading() Node {
 }
 
 func (p *Parser) ul(dep int) Node {
-	fmt.Println("UL: ", p.i, p.tokens[p.i])
+	//fmt.Println("UL:", p.i, p.tokens[p.i], p.tokens[p.i].dep, dep)
 	n := Node{UL, []Node{}, ""}
+	for p.tokens[p.i].ty != EOF {
 	p.i++
-	t := p.tokens[p.i]
-
-	for t.ty != EOF {
-          switch t.ty {
+		fmt.Println(strings.Repeat(" ", dep) + "ul:", p.i, p.tokens[p.i], p.tokens[p.i].dep, dep)
+		switch p.tokens[p.i].ty {
 		case UL:
 			appendChild(&n, p.ul(dep+1))
 		case LIST:
+			if p.tokens[p.i].dep < dep {
+                          p.i--
+				fmt.Println("111111 RETURN UL:", p.i, p.tokens[p.i], p.tokens[p.i].dep, dep)
+				return n
+			}
 			appendChild(&n, p.list(dep))
 		}
 
-		if p.i++; p.i >= len(p.tokens) {
+		if p.tokens[p.i].dep < dep {
+			fmt.Println("RETURN UL:", p.i, p.tokens[p.i], p.tokens[p.i].dep, dep)
 			return n
 		}
-		t = p.tokens[p.i]
-        }
+	}
 	return n
 }
 
 func (p *Parser) list(dep int) Node {
-	fmt.Println("LIST: ", p.i, p.tokens[p.i])
-	t := p.tokens[p.i]
-	n := Node{LIST, []Node{}, t.val}
+	//fmt.Println("LIST:", p.i, p.tokens[p.i], p.tokens[p.i].dep, dep)
+	n := Node{LIST, []Node{}, p.tokens[p.i].val}
 	p.i++
-	t = p.tokens[p.i]
-	for t.ty != EOF {
-		fmt.Println("LIST: ", p.i, p.tokens[p.i], n)
-		switch t.ty {
-		case UL:
-			appendChild(&n, p.ul(dep+1))
-		case LINK:
-			appendChild(&n, p.link())
-		case RAWTEXT:
-			appendChild(&n, p.rawtext(t.val))
-		}
-
-
-		if p.i++; p.i >= len(p.tokens) {
-			return n
-		}
-		t = p.tokens[p.i]
+	fmt.Println(strings.Repeat(" ", dep) + "list:", p.i, p.tokens[p.i], p.tokens[p.i].dep, dep)
+	switch p.tokens[p.i].ty {
+	case UL:
+		appendChild(&n, p.ul(dep+1))
+	case LINK:
+		appendChild(&n, p.link())
+	case RAWTEXT:
+		appendChild(&n, p.rawtext(p.tokens[p.i].val))
 	}
 	return n
 }

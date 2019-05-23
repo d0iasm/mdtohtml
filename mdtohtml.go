@@ -18,7 +18,7 @@ const (
 	UL
 	LIST
 	LINK
-        EOF
+	EOF
 )
 
 func check(e error) {

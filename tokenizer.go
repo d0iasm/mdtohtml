@@ -10,7 +10,7 @@ import (
 type Token struct {
 	ty  Type
 	val string
-        dep int
+	dep int
 }
 
 type Tokenizer struct {
@@ -23,7 +23,7 @@ func (t *Tokenizer) stringLiteral() string {
 	buf := []string{t.s.Text()}
 	for t.s.Scan() {
 		if t.s.Text() == "\n" {
-                  t.s.Scan()
+			t.s.Scan()
 			return strings.Join(buf, "")
 		}
 		buf = append(buf, t.s.Text())
@@ -33,7 +33,7 @@ func (t *Tokenizer) stringLiteral() string {
 
 func (t *Tokenizer) consume(target string) bool {
 	if t.s.Scan() && t.s.Text() == target {
-          t.s.Scan()
+		t.s.Scan()
 		return true
 	}
 	return false
@@ -54,7 +54,7 @@ func (t *Tokenizer) count(target string) int {
 func (t *Tokenizer) ul(dep int, sym string) {
 	t.tokens = append(t.tokens, Token{UL, "", dep})
 	t.list(dep, sym)
-      // Check if an unnested list exists or not.
+	// Check if an unnested list exists or not.
 	if t.buf.String() == strings.Repeat(" ", (dep*2))+sym+" " {
 		t.buf.Reset()
 		t.list(dep, sym)
@@ -65,7 +65,7 @@ func (t *Tokenizer) list(dep int, sym string) {
 	t.tokens = append(t.tokens, Token{LIST, sym, dep})
 	t.tokens = append(t.tokens, Token{RAWTEXT, t.stringLiteral(), dep})
 
-        // Move whitespaces to a buffer.
+	// Move whitespaces to a buffer.
 	for i := 0; i < (dep * 2); i++ {
 		t.buf.WriteString(t.s.Text())
 		if !t.s.Scan() {
@@ -83,14 +83,14 @@ func (t *Tokenizer) list(dep int, sym string) {
 		n := t.count(" ")
 		t.buf.WriteString(strings.Repeat(" ", n))
 		if n == 2 {
-                        if t.s.Text() != sym {
-                          t.buf.WriteString(t.s.Text())
-                          return
-                        }
-                        if !t.consume(" ") {
-                          t.buf.WriteString(t.s.Text())
-                          return
-                        }
+			if t.s.Text() != sym {
+				t.buf.WriteString(t.s.Text())
+				return
+			}
+			if !t.consume(" ") {
+				t.buf.WriteString(t.s.Text())
+				return
+			}
 			t.buf.Reset()
 			t.ul(dep+1, sym)
 		}
@@ -147,7 +147,7 @@ func (t *Tokenizer) tokenize() {
 		}
 	}
 
-        t.tokens = append(t.tokens, Token{EOF, "", -1})
+	t.tokens = append(t.tokens, Token{EOF, "", -1})
 }
 
 func (t *Tokenizer) getTokens() []Token {
