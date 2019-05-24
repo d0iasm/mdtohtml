@@ -7,6 +7,8 @@ import (
 	"strings"
 )
 
+var headOfLine = true
+
 type Token struct {
 	ty  Type
 	val string
@@ -49,6 +51,24 @@ func (t *Tokenizer) count(target string) int {
 		return n
 	}
 	return n
+}
+
+func (t *Tokenizer) headings() {
+	n := t.count("#")
+	if n > 6 {
+		t.buf.WriteString(strings.Repeat("#", n))
+		t.buf.WriteString(t.s.Text())
+		return
+	}
+
+	if t.s.Text() == " " {
+		t.tokens = append(t.tokens, Token{HEADING, strings.Repeat("#", n), -1})
+		// TODO: Not only rawtext after heading. such as link...
+		headOfLine = false
+		return
+	}
+	t.buf.WriteString(strings.Repeat("#", n))
+	t.buf.WriteString(t.s.Text())
 }
 
 func (t *Tokenizer) ul(dep int, sym string) {
@@ -119,7 +139,6 @@ func (t *Tokenizer) list(dep int, sym string) {
 }
 
 func (t *Tokenizer) tokenize() {
-	isHead := true
 	t.s.Split(bufio.ScanRunes)
 	for t.s.Scan() {
 		switch t.s.Text() {
@@ -127,45 +146,32 @@ func (t *Tokenizer) tokenize() {
 			if t.buf.Len() <= 0 {
 				break
 			}
-			if isHead {
+			if headOfLine {
 				t.tokens = append(t.tokens, Token{P, t.buf.String(), -1})
 			} else {
 				t.tokens = append(t.tokens, Token{RAWTEXT, t.buf.String(), -1})
 			}
 			t.buf.Reset()
-			isHead = true
+			headOfLine = true
 		case "#":
-			if !isHead {
+			if !headOfLine {
 				t.buf.WriteString(t.s.Text())
 				break
 			}
-
-			n := t.count("#")
-			if n > 6 {
-				t.buf.WriteString(strings.Repeat("#", n))
-				t.buf.WriteString(t.s.Text())
-				break
-			}
-
-			if t.s.Text() == " " {
-				t.tokens = append(t.tokens, Token{HEADING, strings.Repeat("#", n), -1})
-				// TODO: Not only rawtext after heading. such as link...
-				isHead = false
-				break
-			}
-			t.buf.WriteString(strings.Repeat("#", n))
-			t.buf.WriteString(t.s.Text())
+			t.headings()
 		case "-":
 			sym := t.s.Text()
 			fmt.Println("main", t.buf.String(), sym)
 			if t.consume(" ") {
 				fmt.Println("main2", t.buf.String(), sym)
 				t.ul(0, sym)
-				isHead = false
+				headOfLine = false
 				break
 			}
 			t.buf.WriteString(sym)
 			t.buf.WriteString(t.s.Text())
+		case "[":
+
 		default:
 			t.buf.WriteString(t.s.Text())
 		}
