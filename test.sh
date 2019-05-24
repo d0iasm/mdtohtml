@@ -50,9 +50,11 @@ try "<p>[dummylink] (http://example.com)</p>" "[dummylink] (http://example.com)"
 echo "========== Combination =========="
 echo "========== Heading with Inline Element =========="
 try "<h1><a href=\"http://example.com\">link</a></h1>" "# [link](http://example.com)"
+try "<h1>- dummylist</h1>" "# - dummylist"
 
 echo "========== List with Inline Element =========="
-#try "<ul><li><a href=\"http://example.com\">link</a></li></ul>" "- [link](http://example.com)"
+try "<ul><li><a href=\"http://example.com\">link</a></li></ul>" "- [link](http://example.com)"
+# try "<ul><li>This is <a href=\"http://example.com\">link</a> list.</li></ul>" "- This is [link](http://example.com) list."
 
 echo "========== Heading after List =========="
 try "<ul><li>list1</li></ul><h1>h1</h1>" $'- list1\n# h1'

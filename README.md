@@ -19,9 +19,9 @@ $ make mdtohtml & ./mdtohtml <markdown-filename> -nocss
 - ##### This is an H5
 - ###### This is an H6
 - List
-- Nested sublist
-- Paragraph text.
-- \[text\]\(url\): \<a href="url"\>text\</a\>
+- Nested list
+- Paragraph
+- \[Link\]\(URI\)
 
 ## EBNF
 Entended Backus-Naur form for Markdown grammer.

@@ -63,7 +63,8 @@ func (t *Tokenizer) heading() {
 
 	if t.s.Text() == " " {
 		t.tokens = append(t.tokens, Token{HEADING, strings.Repeat("#", n), -1})
-		headOfLine = false
+		t.s.Scan()
+		t.inline()
 		return
 	}
 	t.buf.WriteString(strings.Repeat("#", n))
@@ -83,7 +84,7 @@ func (t *Tokenizer) ul(dep int, sym string) {
 
 func (t *Tokenizer) list(dep int, sym string) {
 	t.tokens = append(t.tokens, Token{LIST, sym, dep})
-	t.tokens = append(t.tokens, Token{RAWTEXT, t.stringLiteral(), dep})
+	t.inline()
 
 	// End of a list. Return when a fist char is block element.
 	if t.s.Text() == "\n" {
@@ -205,6 +206,19 @@ func (t *Tokenizer) link() {
 			t.buf.WriteString(t.s.Text())
 		}
 		i++
+	}
+}
+
+func (t *Tokenizer) inline() {
+	switch t.s.Text() {
+	case "[":
+		if t.buf.Len() > 0 {
+			t.tokens = append(t.tokens, Token{RAWTEXT, t.buf.String(), -1})
+			t.buf.Reset()
+		}
+		t.link()
+	default:
+		t.tokens = append(t.tokens, Token{RAWTEXT, t.stringLiteral(), -1})
 	}
 }
 
