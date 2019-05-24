@@ -42,7 +42,8 @@ try "<p>-dummylist1</p>" "-dummylist1"
 # try "<ul><li>a -b</li><li>c</li></ul>" $'- a\n  -b\n- c'
 
 echo "========== Link =========="
-try "<a href=\"http://example.com\">hoge</a>" "[hoge](http://example.com)"
+try "<a href=\"http://example.com\">link</a>" "[link](http://example.com)"
+try "<p>[dummylink] (http://example.com)</p>" "[dummylink] (http://example.com)"
 
 rm test.md
 rm test.html

@@ -177,7 +177,9 @@ func (t *Tokenizer) link() {
 			}
 
 			if posLinkE+1 != i {
-				t.buf.WriteString("[" + link + "]" + t.s.Text())
+				tmp := t.buf.String()
+				t.buf.Reset()
+				t.buf.WriteString("[" + link + "]" + tmp + "(")
 				return
 			}
 			posUriS = i
