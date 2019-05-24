@@ -18,6 +18,7 @@ const (
 	UL
 	LIST
 	LINK
+	URI
 	EOF
 )
 

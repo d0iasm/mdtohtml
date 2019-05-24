@@ -138,12 +138,77 @@ func (t *Tokenizer) list(dep int, sym string) {
 	}
 }
 
+func (t *Tokenizer) link() {
+	posLinkE := -1
+	posUriS := -1
+	posUriE := -1
+	i := 0
+        link := ""
+        uri := ""
+	for t.s.Scan() {
+		switch t.s.Text() {
+		case "\n":
+			if posLinkE < 0 {
+				tmp := t.buf.String()
+				t.buf.Reset()
+				t.buf.WriteString("[" + tmp)
+				return
+			}
+			if posUriS < 0 {
+				tmp := t.buf.String()
+				t.buf.Reset()
+				t.buf.WriteString("[" + link + "]" + tmp)
+				return
+			}
+			if posUriE < 0 {
+				tmp := t.buf.String()
+				t.buf.Reset()
+				t.buf.WriteString("[" + link + "]" + "(" + tmp)
+			}
+			return
+		case "]":
+			link = t.buf.String()
+			t.buf.Reset()
+			posLinkE = i
+		case "(":
+			if posLinkE < 0 {
+				t.buf.WriteString("(")
+				break
+			}
+
+			if posLinkE+1 != i {
+				t.buf.WriteString("[" + link + "]" + t.s.Text())
+				return
+			}
+			posUriS = i
+		case ")":
+			if posLinkE < 0 || posUriS < 0 {
+				t.buf.WriteString(")")
+				break
+			}
+
+			posUriE = i
+			if posLinkE+1 == posUriS && posUriS < posUriE {
+				uri = t.buf.String()
+				t.buf.Reset()
+				t.tokens = append(t.tokens, Token{LINK, link, -1})
+				t.tokens = append(t.tokens, Token{URI, uri, -1})
+				return
+			}
+		default:
+			t.buf.WriteString(t.s.Text())
+		}
+		i++
+	}
+}
+
 func (t *Tokenizer) tokenize() {
 	t.s.Split(bufio.ScanRunes)
 	for t.s.Scan() {
 		switch t.s.Text() {
 		case "\n":
 			if t.buf.Len() <= 0 {
+				t.buf.WriteString(" ")
 				break
 			}
 			if headOfLine {
@@ -171,12 +236,15 @@ func (t *Tokenizer) tokenize() {
 			t.buf.WriteString(sym)
 			t.buf.WriteString(t.s.Text())
 		case "[":
-
+			if t.buf.Len() > 0 {
+				t.tokens = append(t.tokens, Token{RAWTEXT, t.buf.String(), -1})
+				t.buf.Reset()
+			}
+			t.link()
 		default:
 			t.buf.WriteString(t.s.Text())
 		}
 	}
-
 	t.tokens = append(t.tokens, Token{EOF, "", -1})
 }
 
