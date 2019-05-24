@@ -27,17 +27,20 @@ $ make mdtohtml & ./mdtohtml <markdown-filename> -nocss
 Entended Backus-Naur form for Markdown grammer.
 ```
 Document = { Block }, EOF ;
-Block = Paragraph | Headings | List ;
+Block = Paragraph | Headings | Lists ;
+Inline = Link | Rawtext ;
 Paragraph = String, { String }, Newline ;
-Lists = List, (List | Lists)* ;
-List = ((" ")*, "-", " ", Paragraph) | Lists ;
+Headings = H1 | H2 | H3 | H4 | H5 | H6 ;
+H1 = "#", Inline ;
+H2 = "#" * 2, Inline ;
+H3 = "#" * 3, Inline ;
+H4 = "#" * 4, Inline ;
+H5 = "#" * 5, Inline ;
+H6 = "#" * 6, Inline ;
+Lists = List, ( List | Lists )* ;
+List = ( (" ")*, "-", " ", Inline ) | Lists ;
+String = { Character } ;
 Newline = "\n" ;
-H1 = "#", String ;
-H2 = "#" * 2, String ;
-H3 = "#" * 3, String ;
-H4 = "#" * 4, String ;
-H5 = "#" * 5, String ;
-H6 = "#" * 6, String ;
 ```
 
 ## Test

@@ -43,7 +43,13 @@ try "<p>-dummylist1</p>" "-dummylist1"
 
 echo "========== Link =========="
 try "<a href=\"http://example.com\">link</a>" "[link](http://example.com)"
+try "<a href=\"http://example.com\">link(2)</a>" "[link(2)](http://example.com)"
 try "<p>[dummylink] (http://example.com)</p>" "[dummylink] (http://example.com)"
+
+
+echo "========== Combination =========="
+echo "========== Headings with Inline Element =========="
+try "<h1><a href=\"http://example.com\">link</a></h1>" "# [link](http://example.com)"
 
 rm test.md
 rm test.html
