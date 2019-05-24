@@ -51,6 +51,9 @@ func (p *Parser) ul(dep int) Node {
 				return n
 			}
 			appendChild(&n, p.list(dep))
+		default:
+			p.i--
+			return n
 		}
 	}
 	return n

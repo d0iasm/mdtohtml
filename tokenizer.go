@@ -63,6 +63,7 @@ func (t *Tokenizer) heading() {
 
 	if t.s.Text() == " " {
 		t.tokens = append(t.tokens, Token{HEADING, strings.Repeat("#", n), -1})
+		fmt.Println("!!!!!!!!!!!11in headins", n, t.s.Text(), t.buf.String(), t.buf.Len(), t.tokens)
 		headOfLine = false
 		return
 	}
@@ -74,16 +75,23 @@ func (t *Tokenizer) ul(dep int, sym string) {
 	t.tokens = append(t.tokens, Token{UL, "", dep})
 	t.list(dep, sym)
 	// Check if an unnested list exists or not.
+	fmt.Println("after list1:", t.buf.String(), t.buf.Len())
 	if t.buf.String() == strings.Repeat(" ", (dep*2))+sym+" " {
 		fmt.Println("ul0", t.buf.String())
 		t.buf.Reset()
 		t.list(dep, sym)
 	}
+	fmt.Println("after list2:", t.buf.String(), t.buf.Len())
 }
 
 func (t *Tokenizer) list(dep int, sym string) {
 	t.tokens = append(t.tokens, Token{LIST, sym, dep})
 	t.tokens = append(t.tokens, Token{RAWTEXT, t.stringLiteral(), dep})
+
+	// End of a list. Return when a fist char is block element.
+	if t.s.Text() == "\n" {
+		return
+	}
 
 	// Move whitespaces to a buffer.
 	for i := 0; i < (dep * 2); i++ {
@@ -206,6 +214,7 @@ func (t *Tokenizer) link() {
 func (t *Tokenizer) tokenize() {
 	t.s.Split(bufio.ScanRunes)
 	for t.s.Scan() {
+		fmt.Println("before switch:", t.s.Text(), headOfLine)
 		switch t.s.Text() {
 		case "\n":
 			if t.buf.Len() <= 0 {
@@ -220,6 +229,7 @@ func (t *Tokenizer) tokenize() {
 			t.buf.Reset()
 			headOfLine = true
 		case "#":
+			fmt.Println("HEADING!:", t.buf.String(), t.buf.Len(), headOfLine)
 			if !headOfLine {
 				t.buf.WriteString(t.s.Text())
 				break
@@ -231,7 +241,7 @@ func (t *Tokenizer) tokenize() {
 			if t.consume(" ") {
 				fmt.Println("main2", t.buf.String(), sym)
 				t.ul(0, sym)
-				headOfLine = false
+				headOfLine = true
 				break
 			}
 			t.buf.WriteString(sym)
@@ -245,6 +255,7 @@ func (t *Tokenizer) tokenize() {
 		default:
 			t.buf.WriteString(t.s.Text())
 		}
+		fmt.Println("after switch:", t.s.Text(), headOfLine)
 	}
 	t.tokens = append(t.tokens, Token{EOF, "", -1})
 }

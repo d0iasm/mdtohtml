@@ -19,7 +19,7 @@ echo "========== Basic Grammer =========="
 echo "========== Paragrah =========="
 try "<p>A paragrah.</p>" "A paragrah."
 
-echo "========== Headings =========="
+echo "========== Heading =========="
 try "<h1>h1</h1>" "# h1"
 try "<h2>h2</h2>" "## h2"
 try "<h3>h3</h3>" "### h3"
@@ -48,8 +48,14 @@ try "<p>[dummylink] (http://example.com)</p>" "[dummylink] (http://example.com)"
 
 
 echo "========== Combination =========="
-echo "========== Headings with Inline Element =========="
+echo "========== Heading with Inline Element =========="
 try "<h1><a href=\"http://example.com\">link</a></h1>" "# [link](http://example.com)"
+
+echo "========== List with Inline Element =========="
+#try "<ul><li><a href=\"http://example.com\">link</a></li></ul>" "- [link](http://example.com)"
+
+echo "========== Heading after List =========="
+try "<ul><li>list1</li></ul><h1>h1</h1>" $'- list1\n\n# h1'
 
 rm test.md
 rm test.html
