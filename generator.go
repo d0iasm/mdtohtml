@@ -25,7 +25,9 @@ func generate(node Node) string {
 	case LIST:
 		return "<li>" + html + "</li>"
 	case LINK:
-		return "<a href=" + node.val + ">" + html + "</a>"
+		return "<a href=\"" + html + "\">" + node.val + "</a>"
+	case URI:
+		return node.val
 	case P:
 		return "<p>" + html + "</p>"
 	default:

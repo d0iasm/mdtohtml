@@ -75,10 +75,11 @@ func (p *Parser) link() Node {
 
 	p.i++
 	t = p.tokens[p.i]
-	if t.ty != RAWTEXT {
-		panic("Token next to LINK should be rawtext.")
+	if t.ty != URI {
+		p.i--
+		return p.rawtext(t.val)
 	}
-	appendChild(&n, p.rawtext(t.val))
+	appendChild(&n, Node{URI, []Node{}, t.val})
 	return n
 }
 

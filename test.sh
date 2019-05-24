@@ -41,6 +41,9 @@ try "<p>-dummylist1</p>" "-dummylist1"
 # Currently, this test fails because 'c' is interpreted as a start of a new list, which means <ul>.
 # try "<ul><li>a -b</li><li>c</li></ul>" $'- a\n  -b\n- c'
 
+echo "========== Link =========="
+try "<a href=\"http://example.com\">hoge</a>" "[hoge](http://example.com)"
+
 rm test.md
 rm test.html
 

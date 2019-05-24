@@ -143,8 +143,8 @@ func (t *Tokenizer) link() {
 	posUriS := -1
 	posUriE := -1
 	i := 0
-        link := ""
-        uri := ""
+	link := ""
+	uri := ""
 	for t.s.Scan() {
 		switch t.s.Text() {
 		case "\n":
