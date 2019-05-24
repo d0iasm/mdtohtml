@@ -63,7 +63,6 @@ func (t *Tokenizer) heading() {
 
 	if t.s.Text() == " " {
 		t.tokens = append(t.tokens, Token{HEADING, strings.Repeat("#", n), -1})
-		fmt.Println("!!!!!!!!!!!11in headins", n, t.s.Text(), t.buf.String(), t.buf.Len(), t.tokens)
 		headOfLine = false
 		return
 	}
@@ -75,13 +74,11 @@ func (t *Tokenizer) ul(dep int, sym string) {
 	t.tokens = append(t.tokens, Token{UL, "", dep})
 	t.list(dep, sym)
 	// Check if an unnested list exists or not.
-	fmt.Println("after list1:", t.buf.String(), t.buf.Len())
 	if t.buf.String() == strings.Repeat(" ", (dep*2))+sym+" " {
-		fmt.Println("ul0", t.buf.String())
+		headOfLine = true
 		t.buf.Reset()
 		t.list(dep, sym)
 	}
-	fmt.Println("after list2:", t.buf.String(), t.buf.Len())
 }
 
 func (t *Tokenizer) list(dep int, sym string) {
@@ -92,10 +89,16 @@ func (t *Tokenizer) list(dep int, sym string) {
 	if t.s.Text() == "\n" {
 		return
 	}
+	if t.s.Text() == "#" {
+		t.heading()
+		return
+	}
+
+	// |headOfLine| should be false when heading() is called.
+	headOfLine = true
 
 	// Move whitespaces to a buffer.
 	for i := 0; i < (dep * 2); i++ {
-		fmt.Println("li0", i, t.buf.String())
 		t.buf.WriteString(t.s.Text())
 		if t.buf.String() == strings.Repeat(" ", i*2)+sym {
 			t.buf.Reset()
@@ -110,10 +113,8 @@ func (t *Tokenizer) list(dep int, sym string) {
 		}
 	}
 
-	fmt.Println("li1", t.buf.String())
 	switch t.s.Text() {
 	case sym:
-		fmt.Println("li2", t.buf.String())
 		if t.consume(" ") {
 			t.buf.Reset()
 			t.list(dep, sym)
@@ -121,13 +122,11 @@ func (t *Tokenizer) list(dep int, sym string) {
 			t.buf.WriteString(sym)
 		}
 	case " ":
-		fmt.Println("li3", t.buf.String())
 		n := t.count(" ")
 		t.buf.WriteString(strings.Repeat(" ", n))
 		if n == 2 {
 			t.buf.Reset()
 			if t.s.Text() != sym {
-				fmt.Println("li4", t.buf.String())
 				t.buf.WriteString(" ")
 				t.buf.WriteString(t.s.Text())
 				return
@@ -136,10 +135,8 @@ func (t *Tokenizer) list(dep int, sym string) {
 				t.buf.WriteString(" ")
 				t.buf.WriteString(sym)
 				t.buf.WriteString(t.s.Text())
-				fmt.Println("li5", t.buf.String(), t.s.Text())
 				return
 			}
-			fmt.Println("li6", t.buf.String(), t.s.Text())
 			t.ul(dep+1, sym)
 		}
 	}
@@ -229,7 +226,6 @@ func (t *Tokenizer) tokenize() {
 			t.buf.Reset()
 			headOfLine = true
 		case "#":
-			fmt.Println("HEADING!:", t.buf.String(), t.buf.Len(), headOfLine)
 			if !headOfLine {
 				t.buf.WriteString(t.s.Text())
 				break
@@ -237,11 +233,8 @@ func (t *Tokenizer) tokenize() {
 			t.heading()
 		case "-":
 			sym := t.s.Text()
-			fmt.Println("main", t.buf.String(), sym)
 			if t.consume(" ") {
-				fmt.Println("main2", t.buf.String(), sym)
 				t.ul(0, sym)
-				headOfLine = true
 				break
 			}
 			t.buf.WriteString(sym)

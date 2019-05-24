@@ -55,7 +55,9 @@ echo "========== List with Inline Element =========="
 #try "<ul><li><a href=\"http://example.com\">link</a></li></ul>" "- [link](http://example.com)"
 
 echo "========== Heading after List =========="
+try "<ul><li>list1</li></ul><h1>h1</h1>" $'- list1\n# h1'
 try "<ul><li>list1</li></ul><h1>h1</h1>" $'- list1\n\n# h1'
+try "<ul><li>a<ul><li>b</li></ul></li></ul><h1>h1</h1>" $'- a\n  - b\n# h1'
 
 rm test.md
 rm test.html
