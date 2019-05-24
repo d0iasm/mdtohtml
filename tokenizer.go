@@ -53,7 +53,7 @@ func (t *Tokenizer) count(target string) int {
 	return n
 }
 
-func (t *Tokenizer) headings() {
+func (t *Tokenizer) heading() {
 	n := t.count("#")
 	if n > 6 {
 		t.buf.WriteString(strings.Repeat("#", n))
@@ -63,7 +63,6 @@ func (t *Tokenizer) headings() {
 
 	if t.s.Text() == " " {
 		t.tokens = append(t.tokens, Token{HEADING, strings.Repeat("#", n), -1})
-		// TODO: Not only rawtext after heading. such as link...
 		headOfLine = false
 		return
 	}
@@ -225,7 +224,7 @@ func (t *Tokenizer) tokenize() {
 				t.buf.WriteString(t.s.Text())
 				break
 			}
-			t.headings()
+			t.heading()
 		case "-":
 			sym := t.s.Text()
 			fmt.Println("main", t.buf.String(), sym)

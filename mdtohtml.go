@@ -13,14 +13,17 @@ type Type int
 const (
 	RAWTEXT Type = iota
 	BODY
-	HEADING
 	P
+	HEADING
 	UL
 	LIST
 	LINK
 	URI
 	EOF
 )
+
+var block = []Type{P, HEADING, UL}
+var inline = []Type{RAWTEXT, LINK}
 
 func check(e error) {
 	if e != nil {

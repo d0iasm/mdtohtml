@@ -25,10 +25,16 @@ func (p *Parser) heading() Node {
 	n := Node{HEADING, []Node{}, t.val}
 	p.i++
 	t = p.tokens[p.i]
-	if t.ty != RAWTEXT {
-		panic("Token next to a heading should be a raw text.")
+	if t.ty != RAWTEXT && t.ty != LINK {
+		panic("The token next to heading should be inline element.")
 	}
-	appendChild(&n, p.rawtext(t.val))
+
+	switch t.ty {
+	case LINK:
+		appendChild(&n, p.link())
+	case RAWTEXT:
+		appendChild(&n, p.rawtext(t.val))
+	}
 	return n
 }
 
