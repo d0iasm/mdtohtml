@@ -33,7 +33,7 @@ func (p *Parser) heading() Node {
 	case LINK:
 		appendChild(&n, p.link())
 	case RAWTEXT:
-		appendChild(&n, p.rawtext(t.val))
+		appendChild(&n, p.rawtext())
 	}
 	return n
 }
@@ -66,7 +66,7 @@ func (p *Parser) list(dep int) Node {
 		case LINK:
 			appendChild(&n, p.link())
 		case RAWTEXT:
-			appendChild(&n, p.rawtext(p.tokens[p.i].val))
+			appendChild(&n, p.rawtext())
 		default:
 			p.i--
 			return n
@@ -83,21 +83,20 @@ func (p *Parser) link() Node {
 	t = p.tokens[p.i]
 	if t.ty != URI {
 		p.i--
-		return p.rawtext(t.val)
+		return p.rawtext()
 	}
 	appendChild(&n, Node{URI, []Node{}, t.val})
 	return n
 }
 
 func (p *Parser) p() Node {
-	t := p.tokens[p.i]
 	n := Node{P, []Node{}, ""}
-	appendChild(&n, p.rawtext(t.val))
+	appendChild(&n, p.rawtext())
 	return n
 }
 
-func (p *Parser) rawtext(s string) Node {
-	return Node{RAWTEXT, []Node{}, s}
+func (p *Parser) rawtext() Node {
+	return Node{RAWTEXT, []Node{}, p.tokens[p.i].val}
 }
 
 func (p *Parser) body() Node {
@@ -116,7 +115,7 @@ func (p *Parser) body() Node {
 		case EOF:
 			return root
 		default:
-			appendChild(&root, p.rawtext(t.val))
+			appendChild(&root, p.rawtext())
 		}
 		p.i++
 	}
