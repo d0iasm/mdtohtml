@@ -16,6 +16,12 @@ h1, h2, h3, h4, h5, h6 {
 h1, h2, h3 {
   border-bottom: 3px black solid;
 }
+h1 > a, h2 > a, h3 > a {
+  text-decoration: none;
+}
+a:hover {
+  opacity:0.5;
+}
 </style>
 `
 }
