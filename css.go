@@ -11,7 +11,7 @@ body {
   margin: 30px auto 0 auto;
 }
 h1, h2, h3, h4, h5, h6 {
-  margin-bottom: 0;
+  margin-bottom: 0.5em;
 }
 h1, h2 {
   border-bottom: 3px black solid;
