@@ -35,7 +35,6 @@ func (t *Tokenizer) stringLiteral() string {
 
 func (t *Tokenizer) consume(target string) bool {
 	if t.s.Scan() && t.s.Text() == target {
-		t.s.Scan()
 		return true
 	}
 	return false
@@ -63,7 +62,6 @@ func (t *Tokenizer) heading() {
 
 	if t.s.Text() == " " {
 		t.tokens = append(t.tokens, Token{HEADING, strings.Repeat("#", n), -1})
-		t.s.Scan()
 		t.inline()
 		return
 	}
@@ -74,8 +72,8 @@ func (t *Tokenizer) heading() {
 func (t *Tokenizer) ul(dep int, sym string) {
 	t.tokens = append(t.tokens, Token{UL, "", dep})
 	t.list(dep, sym)
-	// Check if an unnested list exists or not.
-	if t.buf.String() == strings.Repeat(" ", (dep*2))+sym+" " {
+	// Create an unnested list with this depth.
+	if t.buf.String() == strings.Repeat(" ", (dep*2))+sym && t.s.Text() == " " {
 		headOfLine = true
 		t.buf.Reset()
 		t.list(dep, sym)
@@ -98,16 +96,11 @@ func (t *Tokenizer) list(dep int, sym string) {
 	// |headOfLine| should be false when heading() is called.
 	headOfLine = true
 
-	// Move whitespaces to a buffer.
-	for i := 0; i < (dep * 2); i++ {
+	// Check an existance of an unnested list.
+	for i := 0; i < dep*2; i++ {
 		t.buf.WriteString(t.s.Text())
-		if t.buf.String() == strings.Repeat(" ", i*2)+sym {
-			t.buf.Reset()
-			if t.consume(" ") {
-				t.list(i, sym)
-			} else {
-				t.buf.WriteString(sym)
-			}
+		if t.s.Text() == "-" && t.consume(" ") {
+			return
 		}
 		if !t.s.Scan() {
 			return
@@ -115,14 +108,14 @@ func (t *Tokenizer) list(dep int, sym string) {
 	}
 
 	switch t.s.Text() {
-	case sym:
+	case sym: // Continue a list with the same depth.
 		if t.consume(" ") {
 			t.buf.Reset()
 			t.list(dep, sym)
 		} else {
 			t.buf.WriteString(sym)
 		}
-	case " ":
+	case " ": // Create a nested sublist.
 		n := t.count(" ")
 		t.buf.WriteString(strings.Repeat(" ", n))
 		if n == 2 {
@@ -210,15 +203,19 @@ func (t *Tokenizer) link() {
 }
 
 func (t *Tokenizer) inline() {
-	switch t.s.Text() {
-	case "[":
-		if t.buf.Len() > 0 {
-			t.tokens = append(t.tokens, Token{RAWTEXT, t.buf.String(), -1})
-			t.buf.Reset()
+	for t.s.Scan() {
+		switch t.s.Text() {
+		case "[":
+			if t.buf.Len() > 0 {
+				t.tokens = append(t.tokens, Token{RAWTEXT, t.buf.String(), -1})
+				t.buf.Reset()
+			}
+			t.link()
+		default:
+                        // TODO: remove stringLiteral().
+			t.tokens = append(t.tokens, Token{RAWTEXT, t.stringLiteral(), -1})
 		}
-		t.link()
-	default:
-		t.tokens = append(t.tokens, Token{RAWTEXT, t.stringLiteral(), -1})
+		return
 	}
 }
 
