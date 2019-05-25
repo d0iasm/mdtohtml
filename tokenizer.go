@@ -25,7 +25,6 @@ func (t *Tokenizer) stringLiteral() string {
 	buf := []string{t.s.Text()}
 	for t.s.Scan() {
 		if t.s.Text() == "\n" {
-			t.s.Scan()
 			return strings.Join(buf, "")
 		}
 		buf = append(buf, t.s.Text())
@@ -84,6 +83,9 @@ func (t *Tokenizer) list(dep int, sym string) {
 	t.tokens = append(t.tokens, Token{LIST, sym, dep})
 	t.inline()
 
+	if !t.s.Scan() {
+		return
+	}
 	// End of a list. Return when a fist char is block element.
 	if t.s.Text() == "\n" {
 		return
@@ -212,7 +214,7 @@ func (t *Tokenizer) inline() {
 			}
 			t.link()
 		default:
-                        // TODO: remove stringLiteral().
+			// TODO: remove stringLiteral().
 			t.tokens = append(t.tokens, Token{RAWTEXT, t.stringLiteral(), -1})
 		}
 		return

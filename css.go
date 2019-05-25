@@ -20,7 +20,13 @@ h1 > a, h2 > a {
   text-decoration: none;
 }
 a:hover {
-  opacity:0.5;
+  opacity: 0.5;
+}
+p {
+  margin: 0.5em auto;
+}
+ul {
+  margin: 0.5em auto 1em auto;
 }
 </style>
 `
