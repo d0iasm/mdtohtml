@@ -54,6 +54,7 @@ func main() {
 	fmt.Println("\n----- link -----")
 	test("<a href=\"http://example.com\">link</a>", "[link](http://example.com)")
 	test("<a href=\"http://example.com\">link(2)</a>", "[link(2)](http://example.com)")
+	//test("inline text<a href=\"http://example.com\">link</a>.", "inline text[link](http://example.com).")
 	test("<p>[dummylink] (http://example.com)</p>", "[dummylink] (http://example.com)")
 
 	fmt.Println("\n----- heading with inline elements -----")

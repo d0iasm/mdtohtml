@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	//"fmt"
-	"strconv"
 	"strings"
 )
 
@@ -33,20 +32,9 @@ type Token struct {
 }
 
 type Tokenizer struct {
-	s   *bufio.Scanner
-	buf string
+	s      *bufio.Scanner
+	buf    string
 	tokens []Token
-}
-
-func (t *Tokenizer) stringLiteral() string {
-	buf := []string{t.s.Text()}
-	for t.s.Scan() {
-		if t.s.Text() == "\n" {
-			return strings.Join(buf, "")
-		}
-		buf = append(buf, t.s.Text())
-	}
-	return strings.Join(buf, "")
 }
 
 func (t *Tokenizer) consume(target string) bool {
@@ -101,9 +89,6 @@ func (t *Tokenizer) list(dep int, sym string) {
 	if !t.s.Scan() {
 		return
 	}
-
-	// |headOfLine| should be false when heading() is called.
-	headOfLine = true
 
 	// Check an existance of an unnested list.
 	for i := 0; i < dep*2; i++ {
@@ -165,6 +150,7 @@ func (t *Tokenizer) listitem() {
 			t.buf += t.s.Text()
 		}
 	}
+
 	if len(t.buf) > 0 {
 		t.tokens = append(t.tokens, Token{RAWTEXT, t.buf, -1})
 		t.buf = ""
@@ -246,11 +232,18 @@ func (t *Tokenizer) inline() {
 				t.buf = ""
 			}
 			t.link()
+		case "\n":
+			t.tokens = append(t.tokens, Token{RAWTEXT, t.buf, -1})
+			t.buf = ""
+			return
 		default:
-			// TODO: remove stringLiteral().
-			t.tokens = append(t.tokens, Token{RAWTEXT, t.stringLiteral(), -1})
+			t.buf += t.s.Text()
 		}
-		return
+	}
+
+	if len(t.buf) > 0 {
+		t.tokens = append(t.tokens, Token{RAWTEXT, t.buf, -1})
+		t.buf = ""
 	}
 }
 
@@ -293,8 +286,13 @@ func (t *Tokenizer) tokenize() {
 			t.buf += t.s.Text()
 		}
 	}
+
 	if len(t.buf) > 0 {
-		t.tokens = append(t.tokens, Token{P, t.buf, -1})
+		if headOfLine {
+			t.tokens = append(t.tokens, Token{P, t.buf, -1})
+		} else {
+			t.tokens = append(t.tokens, Token{RAWTEXT, t.buf, -1})
+		}
 	}
 	t.tokens = append(t.tokens, Token{EOF, "", -1})
 }
