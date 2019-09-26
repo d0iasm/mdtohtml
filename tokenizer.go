@@ -249,6 +249,7 @@ func (t *Tokenizer) inline() {
 
 func (t *Tokenizer) tokenize() {
 	t.s.Split(bufio.ScanRunes)
+	headOfLine = true
 	for t.s.Scan() {
 		switch t.s.Text() {
 		case "\n":
@@ -264,11 +265,11 @@ func (t *Tokenizer) tokenize() {
 			t.buf = ""
 			headOfLine = true
 		case "#":
-			if !headOfLine {
-				t.buf += t.s.Text()
+			if headOfLine {
+				t.heading()
 				break
 			}
-			t.heading()
+			t.buf += t.s.Text()
 		case "-":
 			sym := t.s.Text()
 			if t.consume(" ") {
@@ -284,15 +285,12 @@ func (t *Tokenizer) tokenize() {
 			t.link()
 		default:
 			t.buf += t.s.Text()
+			headOfLine = false
 		}
 	}
 
 	if len(t.buf) > 0 {
-		if headOfLine {
-			t.tokens = append(t.tokens, Token{P, t.buf, -1})
-		} else {
-			t.tokens = append(t.tokens, Token{RAWTEXT, t.buf, -1})
-		}
+		t.tokens = append(t.tokens, Token{P, t.buf, -1})
 	}
 	t.tokens = append(t.tokens, Token{EOF, "", -1})
 }

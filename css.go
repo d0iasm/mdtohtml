@@ -18,17 +18,21 @@ h1 {
 h2 {
   border-bottom: 3px black solid;
 }
+h4 {
+  background-color: black;
+  color: white;
+  padding: 0.1em 0.25em;
+  margin: 0;
+  width: fit-content;
+}
 h1 > a, h2 > a {
   text-decoration: none;
 }
 a:hover {
   opacity: 0.5;
 }
-p {
-  margin: 0.5em auto;
-}
-ul {
-  margin: 0.5em auto 1em auto;
+p, ul {
+  margin: 0 auto 0.5em auto;
 }
 </style>
 `
