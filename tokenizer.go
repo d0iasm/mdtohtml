@@ -253,13 +253,10 @@ func (t *Tokenizer) tokenize() {
 	for t.s.Scan() {
 		switch t.s.Text() {
 		case "\n":
-			if len(t.buf) <= 0 {
-				t.buf += " "
-				break
-			}
 			if headOfLine {
 				t.tokens = append(t.tokens, Token{P, t.buf, -1})
 			} else {
+				t.buf += " "
 				t.tokens = append(t.tokens, Token{RAWTEXT, t.buf, -1})
 			}
 			t.buf = ""
