@@ -3,11 +3,28 @@ package main
 import (
 	"bufio"
 	"bytes"
-	"fmt"
+	//"fmt"
 	"strings"
 )
 
 var headOfLine = true
+
+type Type int
+
+const (
+	RAWTEXT Type = iota
+	BODY
+	P
+	HEADING
+	UL
+	LIST
+	LINK
+	URI
+	EOF
+)
+
+var block = []Type{P, HEADING, UL}
+var inline = []Type{RAWTEXT, LINK}
 
 type Token struct {
 	ty  Type
@@ -224,7 +241,6 @@ func (t *Tokenizer) inline() {
 func (t *Tokenizer) tokenize() {
 	t.s.Split(bufio.ScanRunes)
 	for t.s.Scan() {
-		fmt.Println("before switch:", t.s.Text(), headOfLine)
 		switch t.s.Text() {
 		case "\n":
 			if t.buf.Len() <= 0 {
@@ -261,7 +277,9 @@ func (t *Tokenizer) tokenize() {
 		default:
 			t.buf.WriteString(t.s.Text())
 		}
-		fmt.Println("after switch:", t.s.Text(), headOfLine)
+	}
+	if t.buf.Len() > 0 {
+		t.tokens = append(t.tokens, Token{P, t.buf.String(), -1})
 	}
 	t.tokens = append(t.tokens, Token{EOF, "", -1})
 }

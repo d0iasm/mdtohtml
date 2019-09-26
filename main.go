@@ -8,23 +8,6 @@ import (
 	"strings"
 )
 
-type Type int
-
-const (
-	RAWTEXT Type = iota
-	BODY
-	P
-	HEADING
-	UL
-	LIST
-	LINK
-	URI
-	EOF
-)
-
-var block = []Type{P, HEADING, UL}
-var inline = []Type{RAWTEXT, LINK}
-
 func check(e error) {
 	if e != nil {
 		panic(e)
@@ -36,8 +19,7 @@ func main() {
 	name := strings.Split(fname, ".")
 
 	if strings.Compare(strings.ToLower(name[len(name)-1]), "md") != 0 {
-		fmt.Println("Input file must be a markdown file(.md).")
-		os.Exit(1)
+		panic("input file must be a markdown file (.md)")
 	}
 
 	wfile, err := os.Create(name[0] + ".html")

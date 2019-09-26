@@ -1,10 +1,11 @@
-files=mdtohtml.go tokenizer.go parser.go generator.go css.go
+files=tokenizer.go parser.go generator.go css.go
 
-mdtohtml: $(files) 
-	go build $(files) 
+mdtohtml: main.go $(files)
+	go build -o mdtohtml main.go $(files)
 
-test: mdtohtml
-	./test.sh
+test: test.go mdtohtml
+	go build -o test test.go $(files)
+	./test
 
 clean:
 	rm mdtohtml
