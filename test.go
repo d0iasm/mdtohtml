@@ -48,6 +48,7 @@ func main() {
 	test("<ul><li>a<ul><li>aa<ul><li>aaa</li></ul></li></ul></li><li>b</li></ul>", "- a\n  - aa\n    - aaa\n- b")
 	test("<ul><li>a<ul><li>aa<ul><li>aaa</li></ul></li><li>bb</li></ul></li></ul>", "- a\n  - aa\n    - aaa\n  - bb")
 	test("<p>-dummylist1</p>", "-dummylist1")
+	test("<ul><li><h1>h1</h1></li></ul>", "- # h1")
 	//Currently, this test fails because "c" is interpreted as a start of a new list, which means <ul>.
 	//test("<ul><li>a -b</li><li>c</li></ul>", "- a\n  -b\n- c")
 
@@ -62,15 +63,17 @@ func main() {
 
 	fmt.Println("----- list with inline elements -----")
 	test("<ul><li><a href=\"http://example.com\">link</a></li></ul>", "- [link](http://example.com)")
-	//test("<ul><li>This is <a href=\"http://example.com\">link</a> list.</li></ul>", "- This is [link](http://example.com) list.")
+	test("<ul><li>This is <a href=\"http://example.com\">link</a> list.</li></ul>", "- This is [link](http://example.com) list.")
 
+	/***
 	fmt.Println("----- heading after a list -----")
 	test("<ul><li>list1</li></ul><h1>h1</h1>", "- list1\n# h1")
 	test("<ul><li>list1</li></ul><h1>h1</h1>", "- list1\n\n# h1")
 	test("<ul><li>a<ul><li>b</li></ul></li></ul><h1>h1</h1>", "- a\n  - b\n# h1")
+	*/
 
 	fmt.Println("----- multiple lines -----")
 	test("<h1>h1</h1><p>text</p>", "# h1\ntext")
 
-        fmt.Println("OK")
+	fmt.Println("OK")
 }

@@ -3,7 +3,8 @@ package main
 import (
 	"bufio"
 	"bytes"
-	//"fmt"
+	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -98,17 +99,9 @@ func (t *Tokenizer) ul(dep int, sym string) {
 
 func (t *Tokenizer) list(dep int, sym string) {
 	t.tokens = append(t.tokens, Token{LIST, sym, dep})
-	t.inline()
 
+	t.listitem()
 	if !t.s.Scan() {
-		return
-	}
-	// End of a list. Return when a fist char is block element.
-	if t.s.Text() == "\n" {
-		return
-	}
-	if t.s.Text() == "#" {
-		t.heading()
 		return
 	}
 
@@ -152,6 +145,36 @@ func (t *Tokenizer) list(dep int, sym string) {
 			}
 			t.ul(dep+1, sym)
 		}
+	}
+}
+
+func (t *Tokenizer) listitem() {
+	for t.s.Scan() {
+		fmt.Println(t.buf.String(), t.s.Text())
+		switch t.s.Text() {
+		case "\n":
+			t.tokens = append(t.tokens, Token{RAWTEXT, t.buf.String(), -1})
+			t.buf.Reset()
+			return
+		case "#":
+			if t.buf.Len() == 0 {
+				t.heading()
+			} else {
+				t.buf.WriteString(t.s.Text())
+			}
+		case "[":
+			if t.buf.Len() > 0 {
+				t.tokens = append(t.tokens, Token{RAWTEXT, t.buf.String(), -1})
+				t.buf.Reset()
+			}
+			t.link()
+		default:
+			t.buf.WriteString(t.s.Text())
+		}
+	}
+	if t.buf.Len() > 0 {
+		t.tokens = append(t.tokens, Token{RAWTEXT, t.buf.String(), -1})
+		t.buf.Reset()
 	}
 }
 

@@ -68,6 +68,8 @@ func (p *Parser) list(dep int) Node {
 			appendChild(&n, p.ul(dep+1))
 		case LINK:
 			appendChild(&n, p.link())
+		case HEADING:
+			appendChild(&n, p.heading())
 		case RAWTEXT:
 			appendChild(&n, p.rawtext())
 		default:
