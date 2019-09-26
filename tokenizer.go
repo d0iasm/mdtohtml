@@ -2,8 +2,7 @@ package main
 
 import (
 	"bufio"
-	"bytes"
-	"fmt"
+	//"fmt"
 	"strconv"
 	"strings"
 )
@@ -34,8 +33,8 @@ type Token struct {
 }
 
 type Tokenizer struct {
-	s      *bufio.Scanner
-	buf    *bytes.Buffer
+	s   *bufio.Scanner
+	buf string
 	tokens []Token
 }
 
@@ -72,8 +71,7 @@ func (t *Tokenizer) count(target string) int {
 func (t *Tokenizer) heading() {
 	n := t.count("#")
 	if n > 6 {
-		t.buf.WriteString(strings.Repeat("#", n))
-		t.buf.WriteString(t.s.Text())
+		t.buf += strings.Repeat("#", n) + t.s.Text()
 		return
 	}
 
@@ -82,17 +80,16 @@ func (t *Tokenizer) heading() {
 		t.inline()
 		return
 	}
-	t.buf.WriteString(strings.Repeat("#", n))
-	t.buf.WriteString(t.s.Text())
+	t.buf += strings.Repeat("#", n) + t.s.Text()
 }
 
 func (t *Tokenizer) ul(dep int, sym string) {
 	t.tokens = append(t.tokens, Token{UL, "", dep})
 	t.list(dep, sym)
 	// Create an unnested list with this depth.
-	if t.buf.String() == strings.Repeat(" ", (dep*2))+sym && t.s.Text() == " " {
+	if t.buf == strings.Repeat(" ", (dep*2))+sym && t.s.Text() == " " {
 		headOfLine = true
-		t.buf.Reset()
+		t.buf = ""
 		t.list(dep, sym)
 	}
 }
@@ -110,7 +107,7 @@ func (t *Tokenizer) list(dep int, sym string) {
 
 	// Check an existance of an unnested list.
 	for i := 0; i < dep*2; i++ {
-		t.buf.WriteString(t.s.Text())
+		t.buf += t.s.Text()
 		if t.s.Text() == "-" && t.consume(" ") {
 			return
 		}
@@ -122,25 +119,22 @@ func (t *Tokenizer) list(dep int, sym string) {
 	switch t.s.Text() {
 	case sym: // Continue a list with the same depth.
 		if t.consume(" ") {
-			t.buf.Reset()
+			t.buf = ""
 			t.list(dep, sym)
 		} else {
-			t.buf.WriteString(sym)
+			t.buf += sym
 		}
 	case " ": // Create a nested sublist.
 		n := t.count(" ")
-		t.buf.WriteString(strings.Repeat(" ", n))
+		t.buf += strings.Repeat(" ", n)
 		if n == 2 {
-			t.buf.Reset()
+			t.buf = ""
 			if t.s.Text() != sym {
-				t.buf.WriteString(" ")
-				t.buf.WriteString(t.s.Text())
+				t.buf += " " + t.s.Text()
 				return
 			}
 			if !t.consume(" ") {
-				t.buf.WriteString(" ")
-				t.buf.WriteString(sym)
-				t.buf.WriteString(t.s.Text())
+				t.buf += " " + sym + t.s.Text()
 				return
 			}
 			t.ul(dep+1, sym)
@@ -150,31 +144,30 @@ func (t *Tokenizer) list(dep int, sym string) {
 
 func (t *Tokenizer) listitem() {
 	for t.s.Scan() {
-		fmt.Println(t.buf.String(), t.s.Text())
 		switch t.s.Text() {
 		case "\n":
-			t.tokens = append(t.tokens, Token{RAWTEXT, t.buf.String(), -1})
-			t.buf.Reset()
+			t.tokens = append(t.tokens, Token{RAWTEXT, t.buf, -1})
+			t.buf = ""
 			return
 		case "#":
-			if t.buf.Len() == 0 {
+			if len(t.buf) == 0 {
 				t.heading()
 			} else {
-				t.buf.WriteString(t.s.Text())
+				t.buf += t.s.Text()
 			}
 		case "[":
-			if t.buf.Len() > 0 {
-				t.tokens = append(t.tokens, Token{RAWTEXT, t.buf.String(), -1})
-				t.buf.Reset()
+			if len(t.buf) > 0 {
+				t.tokens = append(t.tokens, Token{RAWTEXT, t.buf, -1})
+				t.buf = ""
 			}
 			t.link()
 		default:
-			t.buf.WriteString(t.s.Text())
+			t.buf += t.s.Text()
 		}
 	}
-	if t.buf.Len() > 0 {
-		t.tokens = append(t.tokens, Token{RAWTEXT, t.buf.String(), -1})
-		t.buf.Reset()
+	if len(t.buf) > 0 {
+		t.tokens = append(t.tokens, Token{RAWTEXT, t.buf, -1})
+		t.buf = ""
 	}
 }
 
@@ -189,56 +182,56 @@ func (t *Tokenizer) link() {
 		switch t.s.Text() {
 		case "\n":
 			if posLinkE < 0 {
-				tmp := t.buf.String()
-				t.buf.Reset()
-				t.buf.WriteString("[" + tmp)
+				tmp := t.buf
+				t.buf = ""
+				t.buf += "[" + tmp
 				return
 			}
 			if posUriS < 0 {
-				tmp := t.buf.String()
-				t.buf.Reset()
-				t.buf.WriteString("[" + link + "]" + tmp)
+				tmp := t.buf
+				t.buf = ""
+				t.buf += "[" + link + "]" + tmp
 				return
 			}
 			if posUriE < 0 {
-				tmp := t.buf.String()
-				t.buf.Reset()
-				t.buf.WriteString("[" + link + "]" + "(" + tmp)
+				tmp := t.buf
+				t.buf = ""
+				t.buf += "[" + link + "]" + "(" + tmp
 			}
 			return
 		case "]":
-			link = t.buf.String()
-			t.buf.Reset()
+			link = t.buf
+			t.buf = ""
 			posLinkE = i
 		case "(":
 			if posLinkE < 0 {
-				t.buf.WriteString("(")
+				t.buf += "("
 				break
 			}
 
 			if posLinkE+1 != i {
-				tmp := t.buf.String()
-				t.buf.Reset()
-				t.buf.WriteString("[" + link + "]" + tmp + "(")
+				tmp := t.buf
+				t.buf = ""
+				t.buf += "[" + link + "]" + tmp + "("
 				return
 			}
 			posUriS = i
 		case ")":
 			if posLinkE < 0 || posUriS < 0 {
-				t.buf.WriteString(")")
+				t.buf += ")"
 				break
 			}
 
 			posUriE = i
 			if posLinkE+1 == posUriS && posUriS < posUriE {
-				uri = t.buf.String()
-				t.buf.Reset()
+				uri = t.buf
+				t.buf = ""
 				t.tokens = append(t.tokens, Token{LINK, link, -1})
 				t.tokens = append(t.tokens, Token{URI, uri, -1})
 				return
 			}
 		default:
-			t.buf.WriteString(t.s.Text())
+			t.buf += t.s.Text()
 		}
 		i++
 	}
@@ -248,9 +241,9 @@ func (t *Tokenizer) inline() {
 	for t.s.Scan() {
 		switch t.s.Text() {
 		case "[":
-			if t.buf.Len() > 0 {
-				t.tokens = append(t.tokens, Token{RAWTEXT, t.buf.String(), -1})
-				t.buf.Reset()
+			if len(t.buf) > 0 {
+				t.tokens = append(t.tokens, Token{RAWTEXT, t.buf, -1})
+				t.buf = ""
 			}
 			t.link()
 		default:
@@ -266,20 +259,20 @@ func (t *Tokenizer) tokenize() {
 	for t.s.Scan() {
 		switch t.s.Text() {
 		case "\n":
-			if t.buf.Len() <= 0 {
-				t.buf.WriteString(" ")
+			if len(t.buf) <= 0 {
+				t.buf += " "
 				break
 			}
 			if headOfLine {
-				t.tokens = append(t.tokens, Token{P, t.buf.String(), -1})
+				t.tokens = append(t.tokens, Token{P, t.buf, -1})
 			} else {
-				t.tokens = append(t.tokens, Token{RAWTEXT, t.buf.String(), -1})
+				t.tokens = append(t.tokens, Token{RAWTEXT, t.buf, -1})
 			}
-			t.buf.Reset()
+			t.buf = ""
 			headOfLine = true
 		case "#":
 			if !headOfLine {
-				t.buf.WriteString(t.s.Text())
+				t.buf += t.s.Text()
 				break
 			}
 			t.heading()
@@ -289,20 +282,19 @@ func (t *Tokenizer) tokenize() {
 				t.ul(0, sym)
 				break
 			}
-			t.buf.WriteString(sym)
-			t.buf.WriteString(t.s.Text())
+			t.buf += sym + t.s.Text()
 		case "[":
-			if t.buf.Len() > 0 {
-				t.tokens = append(t.tokens, Token{RAWTEXT, t.buf.String(), -1})
-				t.buf.Reset()
+			if len(t.buf) > 0 {
+				t.tokens = append(t.tokens, Token{RAWTEXT, t.buf, -1})
+				t.buf = ""
 			}
 			t.link()
 		default:
-			t.buf.WriteString(t.s.Text())
+			t.buf += t.s.Text()
 		}
 	}
-	if t.buf.Len() > 0 {
-		t.tokens = append(t.tokens, Token{P, t.buf.String(), -1})
+	if len(t.buf) > 0 {
+		t.tokens = append(t.tokens, Token{P, t.buf, -1})
 	}
 	t.tokens = append(t.tokens, Token{EOF, "", -1})
 }

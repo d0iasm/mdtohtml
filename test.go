@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"bytes"
 	"fmt"
 	"strings"
 )
@@ -10,7 +9,7 @@ import (
 func test(expect string, input string) {
 	t := Tokenizer{
 		bufio.NewScanner(strings.NewReader(input)),
-		bytes.NewBufferString(""),
+		"",
 		[]Token{},
 	}
 	t.tokenize()
@@ -29,7 +28,7 @@ func test(expect string, input string) {
 func main() {
 	test("<p>a paragraph</p>", "a paragraph")
 
-	fmt.Println("----- heading -----")
+	fmt.Println("\n----- heading -----")
 	test("<h1>h1</h1>", "# h1")
 	test("<h2>h2</h2>", "## h2")
 	test("<h3>h3</h3>", "### h3")
@@ -39,7 +38,7 @@ func main() {
 	test("<p>####### h7</p>", "####### h7")
 	test("<p>###dummyh3</p>", "###dummyh3")
 
-	fmt.Println("----- list -----")
+	fmt.Println("\n----- list -----")
 	test("<ul><li>list1</li></ul>", "- list1")
 	test("<ul><li>list1</li><li>list2</li></ul>", "- list1\n- list2")
 	test("<ul><li>list1<ul><li>sublist1</li></ul></li></ul>", "- list1\n  - sublist1")
@@ -52,16 +51,16 @@ func main() {
 	//Currently, this test fails because "c" is interpreted as a start of a new list, which means <ul>.
 	//test("<ul><li>a -b</li><li>c</li></ul>", "- a\n  -b\n- c")
 
-	fmt.Println("----- link -----")
+	fmt.Println("\n----- link -----")
 	test("<a href=\"http://example.com\">link</a>", "[link](http://example.com)")
 	test("<a href=\"http://example.com\">link(2)</a>", "[link(2)](http://example.com)")
 	test("<p>[dummylink] (http://example.com)</p>", "[dummylink] (http://example.com)")
 
-	fmt.Println("----- heading with inline elements -----")
+	fmt.Println("\n----- heading with inline elements -----")
 	test("<h1><a href=\"http://example.com\">link</a></h1>", "# [link](http://example.com)")
 	test("<h1>- dummylist</h1>", "# - dummylist")
 
-	fmt.Println("----- list with inline elements -----")
+	fmt.Println("\n----- list with inline elements -----")
 	test("<ul><li><a href=\"http://example.com\">link</a></li></ul>", "- [link](http://example.com)")
 	test("<ul><li>This is <a href=\"http://example.com\">link</a> list.</li></ul>", "- This is [link](http://example.com) list.")
 
@@ -72,7 +71,7 @@ func main() {
 	test("<ul><li>a<ul><li>b</li></ul></li></ul><h1>h1</h1>", "- a\n  - b\n# h1")
 	*/
 
-	fmt.Println("----- multiple lines -----")
+	fmt.Println("\n----- multiple lines -----")
 	test("<h1>h1</h1><p>text</p>", "# h1\ntext")
 
 	fmt.Println("OK")
