@@ -2,8 +2,10 @@ package main
 
 func css() string {
 	return `
+<link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
 <style>
 body {
+  font-family: 'Roboto', sans-serif;
   font-size: 18px;
   max-width: 680px;
   margin: 30px auto 0 auto;
