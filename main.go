@@ -34,17 +34,17 @@ func main() {
 	defer rfile.Close()
 	reader := bufio.NewReader(rfile)
 
+	lines := make([]Line, 0)
 	for {
 		line, _, err := reader.ReadLine()
 		if err != nil { // io.EOF
 			break
 		}
-		html := transpile(line)
-		fmt.Println("---------")
-		fmt.Println(string(line))
-		fmt.Println(html)
-		fmt.Println("---------")
-		writer.WriteString(html)
+		lines = append(lines, transpile(line))
 	}
+
+	writer.WriteString("<body>")
+	writer.WriteString(generate(lines))
+	writer.WriteString("</body>")
 	writer.Flush()
 }

@@ -2,10 +2,16 @@ package main
 
 import (
 	"fmt"
+	"strings"
 )
 
 func test(expect string, input string) {
-  html := transpile([]byte(input))
+	lines := make([]Line, 0)
+	for _, in := range strings.Split(input, "\n") {
+		lines = append(lines, transpile([]byte(in)))
+	}
+	html := generate(lines)
+
 	if html == expect {
 		fmt.Println(input + " => " + expect)
 	} else {
@@ -26,10 +32,10 @@ func main() {
 	//test("<p>####### h7</p>", "####### h7")
 	//test("<p>###dummyh3</p>", "###dummyh3")
 
-        /**
 	fmt.Println("\n----- list -----")
 	test("<ul><li>list1</li></ul>", "- list1")
 	test("<ul><li>list1</li><li>list2</li></ul>", "- list1\n- list2")
+	/**
 	test("<ul><li>list1<ul><li>sublist1</li></ul></li></ul>", "- list1\n  - sublist1")
 	test("<ul><li>list1<ul><li>sublist1<ul><li>subsublist1</li></ul></li></ul></li></ul>", "- list1\n  - sublist1\n    - subsublist1")
 	test("<ul><li>list1<ul><li>sublist1</li></ul></li><li>list2</li></ul>", "- list1\n  - sublist1\n- list2")
@@ -39,7 +45,7 @@ func main() {
 	test("<ul><li><h1>h1</h1></li></ul>", "- # h1")
 	//Currently, this test fails because "c" is interpreted as a start of a new list, which means <ul>.
 	//test("<ul><li>a -b</li><li>c</li></ul>" "- a\n  -b\n- c")
-        */
+	*/
 
 	fmt.Println("\n----- link -----")
 	test("<a href=\"http://example.com\">link</a>", "[link](http://example.com)")
@@ -51,7 +57,7 @@ func main() {
 	test("<h1><a href=\"http://example.com\">link</a></h1>", "# [link](http://example.com)")
 	test("<h1>- dummylist</h1>", "# - dummylist")
 
-        /**
+	/**
 	fmt.Println("\n----- list with inline elements -----")
 	test("<ul><li><a href=\"http://example.com\">link</a></li></ul>", "- [link](http://example.com)")
 	test("<ul><li>This is <a href=\"http://example.com\">link</a> list.</li></ul>", "- This is [link](http://example.com) list.")

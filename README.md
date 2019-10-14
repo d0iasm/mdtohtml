@@ -12,6 +12,7 @@ $ make mdtohtml & ./mdtohtml <markdown-filename> -nocss
 ```
 
 ## Current support notations (2019-05-23)
+```
 - # This is an H1
 - ## This is an H2
 - ### This is an H3
@@ -22,6 +23,7 @@ $ make mdtohtml & ./mdtohtml <markdown-filename> -nocss
 - Nested list
 - Paragraph
 - \[Link\]\(URI\)
+```
 
 ## EBNF
 Entended Backus-Naur form for Markdown grammer.
@@ -44,5 +46,4 @@ Newline = "\n" ;
 ```
 
 ## Test
-Supports tesh written in bash script. You can test this tool just by `$ make test`.
-
+Supports test written in Go. You can test this tool just by `$ make test`.
