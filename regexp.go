@@ -71,66 +71,51 @@ func hton(ty Type) int {
 	}
 }
 
-func transpile(line []byte) Line {
+func convert(line string) Line {
 	// inline elements are replaced with HTML in this function.
-	for link.Match(line) { // links <a href="url">link text</a>
+	for link.MatchString(line) { // links <a href="url">link text</a>
 		//line[loc[2]:loc[3]]: link text
 		//line[loc[4]:loc[5]]: url
-		loc := link.FindSubmatchIndex(line)
+		loc := link.FindStringSubmatchIndex(line)
 
-		text := make([]byte, loc[3]-loc[2]-2)
-		copy(text, line[loc[2]+1:loc[3]-1])
-		url := make([]byte, loc[5]-loc[4]-2)
-		copy(url, line[loc[4]+1:loc[5]-1])
+		text := line[loc[2]+1 : loc[3]-1]
+		url := line[loc[4]+1 : loc[5]-1]
 
-		newli := make([]byte, 0)
-		newli = append(newli, line[:loc[2]]...)
-		newli = append(newli, []byte("<a href=\"")...)
-		newli = append(newli, url...)
-		newli = append(newli, []byte("\">")...)
-		newli = append(newli, text...)
-		newli = append(newli, []byte("</a>")...)
-		newli = append(newli, line[loc[5]:]...)
-
-		// extend the length
-		line = make([]byte, len(newli))
-		copy(line, newli)
+		litag := "<a href=\"" + url + "\">" + text + "</a>"
+		line = line[:loc[2]] + litag + line[loc[5]:]
 	}
 
-	if headingIn.Match(line) {
+	// heading existing in another component
+	if headingIn.MatchString(line) {
 		//line[loc[2]:loc[3]]: #, ##, ..., or ######
 		//line[loc[4]:loc[5]]: title
-		loc := headingIn.FindSubmatchIndex(line)
-		n := loc[3] - loc[2]
-		h := "h" + strconv.Itoa(n)
-		newh := "<" + h + ">" + string(line[loc[4]:loc[5]]) + "</" + h + ">"
-		newh = string(line[:loc[2]]) + newh
-		line = make([]byte, len([]byte(newh)))
-		copy(line, []byte(newh))
+		loc := headingIn.FindStringSubmatchIndex(line)
+
+		n := loc[3] - loc[2] // heading number
+		htag := "<h" + strconv.Itoa(n) + ">" + line[loc[4]:loc[5]] + "</h" + strconv.Itoa(n) + ">"
+		line = line[:loc[2]] + htag
 	}
 
 	// break at the end of line
-	if string(line[len(line)-2:]) == "  " {
-		newbr := string(line[:len(line)-2]) + "<br>"
-		line = make([]byte, len([]byte(newbr)))
-		copy(line, []byte(newbr))
+	if len(line) > 2 && line[len(line)-2:] == "  " {
+		line = line[:len(line)-2] + "<br>"
 	}
 
 	// block elements will be replaced with HTML in the generate().
-	if list.Match(line) {
+	if list.MatchString(line) {
 		//line[loc[2]:loc[3]]: white spaces before "-"
 		//line[loc[4]:loc[5]]: list content
-		loc := list.FindSubmatchIndex(line)
+		loc := list.FindStringSubmatchIndex(line)
 		dep := loc[3] / 2
-		return Line{Li, string(line[loc[4]:loc[5]]), dep}
+		return Line{Li, line[loc[4]:loc[5]], dep}
 	}
 
-	if heading.Match(line) {
+	if heading.MatchString(line) {
 		//line[loc[2]:loc[3]]: #, ##, ..., or ######
 		//line[loc[4]:loc[5]]: title
-		loc := heading.FindSubmatchIndex(line)
+		loc := heading.FindStringSubmatchIndex(line)
 		n := loc[3]
-		return Line{ntoh(n), string(line[loc[4]:loc[5]]), 0}
+		return Line{ntoh(n), line[loc[4]:loc[5]], 0}
 	}
-	return Line{P, string(line), 0}
+	return Line{P, line, 0}
 }

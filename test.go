@@ -8,7 +8,7 @@ import (
 func test(expect string, input string) {
 	lines := make([]Line, 0)
 	for _, in := range strings.Split(input, "\n") {
-		lines = append(lines, transpile([]byte(in)))
+		lines = append(lines, convert(in))
 	}
 	html := generate(lines)
 
@@ -68,7 +68,7 @@ func main() {
 	test("<ul><li><a href=\"http://example.com\">link</a></li></ul>", "- [link](http://example.com)")
 	test("<ul><li>This is <a href=\"http://example.com\">link</a> list.</li></ul>", "- This is [link](http://example.com) list.")
 
-	fmt.Println("----- heading after a list -----")
+	fmt.Println("\n----- heading after a list -----")
 	test("<ul><li>list1</li></ul><h1>h1</h1>", "- list1\n# h1")
 	test("<ul><li>list1</li></ul><h1>h1</h1>", "- list1\n\n# h1")
 	//test("<ul><li>a<ul><li>b</li></ul></li></ul><h1>h1</h1>", "- a\n  - b\n# h1")

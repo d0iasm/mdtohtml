@@ -36,11 +36,11 @@ func main() {
 
 	lines := make([]Line, 0)
 	for {
-		line, _, err := reader.ReadLine()
+		line, err := reader.ReadString('\n')
 		if err != nil { // io.EOF
 			break
 		}
-		lines = append(lines, transpile(line))
+		lines = append(lines, convert(line))
 	}
 
 	writer.WriteString("<body>")
