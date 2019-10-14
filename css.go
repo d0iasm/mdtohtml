@@ -33,8 +33,11 @@ h1 > a, h2 > a {
 a:hover {
   opacity: 0.5;
 }
-p, ul {
+p {
   margin: 0 auto 0.5em auto;
+}
+ul {
+  margin: 0 auto;
 }
 </style>
 `

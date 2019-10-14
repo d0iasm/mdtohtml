@@ -3,12 +3,14 @@ package main
 import (
 	"fmt"
 	"regexp"
+	"strconv"
 )
 
 var (
-	heading, _ = regexp.Compile("(^#{1,6}) (.+)")
-	list, _    = regexp.Compile("^( *)- (.+)")
-	link, _    = regexp.Compile(".*(\\[.+\\])(\\(.+\\)).*")
+	heading, _   = regexp.Compile("(^#{1,6}) (.+)")
+	headingIn, _ = regexp.Compile("^[^#]+(#{1,6}) (.+)")
+	list, _      = regexp.Compile("^( *)- (.+)")
+	link, _      = regexp.Compile(".*(\\[.+\\])(\\(.+\\)).*")
 )
 
 type Type int
@@ -93,6 +95,18 @@ func transpile(line []byte) Line {
 		// extend the length
 		line = make([]byte, len(newli))
 		copy(line, newli)
+	}
+
+	if headingIn.Match(line) {
+		//line[loc[2]:loc[3]]: #, ##, ..., or ######
+		//line[loc[4]:loc[5]]: title
+		loc := headingIn.FindSubmatchIndex(line)
+		n := loc[3] - loc[2]
+		h := "h" + strconv.Itoa(n)
+		newh := "<" + h + ">" + string(line[loc[4]:loc[5]]) + "</" + h + ">"
+		newh = string(line[:loc[2]]) + newh
+		line = make([]byte, len([]byte(newh)))
+		copy(line, []byte(newh))
 	}
 
 	// block elements will be replaced with HTML in the generate().

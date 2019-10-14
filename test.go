@@ -36,7 +36,13 @@ func main() {
 	test("<ul><li>list1</li></ul>", "- list1")
 	test("<ul><li>list1</li><li>list2</li></ul>", "- list1\n- list2")
 	test("<ul><li>list1</li><ul><li>sublist1</li></ul></ul>", "- list1\n  - sublist1")
-        //test("<ul><li>list1<ul><li>sublist1</li></ul></li></ul>", "- list1\n  - sublist1")
+	test("<ul><li>list1</li><ul><li>sublist1</li><ul><li>subsublist1</li></ul></ul></ul>", "- list1\n  - sublist1\n    - subsublist1")
+	test("<ul><li>list1</li><ul><li>sublist1</li></ul><li>list2</li></ul>", "- list1\n  - sublist1\n- list2")
+	test("<ul><li>a</li><ul><li>aa</li><ul><li>aaa</li></ul></ul><li>b</li></ul>", "- a\n  - aa\n    - aaa\n- b")
+	test("<ul><li>a</li><ul><li>aa</li><ul><li>aaa</li></ul><li>bb</li></ul></ul>", "- a\n  - aa\n    - aaa\n  - bb")
+	test("<ul><li><h1>h1</h1></li></ul>", "- # h1")
+
+	//test("<ul><li>list1<ul><li>sublist1</li></ul></li></ul>", "- list1\n  - sublist1")
 	//test("<ul><li>list1<ul><li>sublist1<ul><li>subsublist1</li></ul></li></ul></li></ul>", "- list1\n  - sublist1\n    - subsublist1")
 	//test("<ul><li>list1<ul><li>sublist1</li></ul></li><li>list2</li></ul>", "- list1\n  - sublist1\n- list2")
 	//test("<ul><li>a<ul><li>aa<ul><li>aaa</li></ul></li></ul></li><li>b</li></ul>", "- a\n  - aa\n    - aaa\n- b")
@@ -56,7 +62,6 @@ func main() {
 	test("<h1><a href=\"http://example.com\">link</a></h1>", "# [link](http://example.com)")
 	test("<h1>- dummylist</h1>", "# - dummylist")
 
-	/**
 	fmt.Println("\n----- list with inline elements -----")
 	test("<ul><li><a href=\"http://example.com\">link</a></li></ul>", "- [link](http://example.com)")
 	test("<ul><li>This is <a href=\"http://example.com\">link</a> list.</li></ul>", "- This is [link](http://example.com) list.")
@@ -64,11 +69,12 @@ func main() {
 	fmt.Println("----- heading after a list -----")
 	test("<ul><li>list1</li></ul><h1>h1</h1>", "- list1\n# h1")
 	test("<ul><li>list1</li></ul><h1>h1</h1>", "- list1\n\n# h1")
-	test("<ul><li>a<ul><li>b</li></ul></li></ul><h1>h1</h1>", "- a\n  - b\n# h1")
+        //test("<ul><li>a<ul><li>b</li></ul></li></ul><h1>h1</h1>", "- a\n  - b\n# h1")
 
+        /**
 	fmt.Println("\n----- multiple lines -----")
 	test("<h1>h1</h1><p>text</p>", "# h1\ntext")
+        */
 
-	*/
 	fmt.Println("OK")
 }
