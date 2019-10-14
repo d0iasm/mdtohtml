@@ -11,26 +11,21 @@ $ make mdtohtml & ./mdtohtml <markdown-filename>
 $ make mdtohtml & ./mdtohtml <markdown-filename> -nocss
 ```
 
-## Current support notations (2019-05-23)
-```
-- # This is an H1
-- ## This is an H2
-- ### This is an H3
-- #### This is an H4
-- ##### This is an H5
-- ###### This is an H6
+## Current support notations (2019-10-14)
+- Paragraph
+- Headings
 - List
 - Nested list
-- Paragraph
-- \[Link\]\(URI\)
-```
+- Link
+- Emphasis
+- Strong
 
 ## EBNF
 Entended Backus-Naur form for Markdown grammer.
 ```
 Document = { Block }, EOF ;
 Block = Paragraph | Headings | Lists ;
-Inline = Link | Rawtext ;
+Inline = Link | Rawtext | Emphasis | Strong ;
 Paragraph = String, { String }, Newline ;
 Headings = H1 | H2 | H3 | H4 | H5 | H6 ;
 H1 = "#", Inline ;
@@ -41,6 +36,8 @@ H5 = "#" * 5, Inline ;
 H6 = "#" * 6, Inline ;
 Lists = List, ( List | Lists )* ;
 List = ( (" ")*, "-", " ", Inline ) | Lists ;
+Emphasis = "*" Rawtext "*" | "_" Rawtext "_" ;
+Strong = "**" Rawtext "**" | "__" Rawtext "__" ;
 String = { Character } ;
 Newline = "\n" ;
 ```

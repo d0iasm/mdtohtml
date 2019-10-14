@@ -75,6 +75,8 @@ func main() {
 	fmt.Println("\n----- emphasis -----")
 	test("<p><em>emphasis</em></p>", "*emphasis*")
 	test("<p><em>emphasis</em></p>", "_emphasis_")
+	test("<p><strong>strong</strong></p>", "**strong**")
+	test("<p><strong>strong</strong></p>", "__strong__")
 
 	fmt.Println("OK")
 }

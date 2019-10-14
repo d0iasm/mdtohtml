@@ -39,10 +39,6 @@ p {
 ul {
   margin: 0 auto;
 }
-em {
-
-
-}
 </style>
 `
 }

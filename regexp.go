@@ -12,6 +12,7 @@ var (
 	list, _       = regexp.Compile("^( *)- (.+)")
 	link, _       = regexp.Compile(".*(\\[.+\\])(\\(.+\\)).*")
 	emphasis, _   = regexp.Compile(".*(\\*.+\\*).*|.*(\\_.+\\_).*")
+	strong, _     = regexp.Compile(".*(\\*\\*.+\\*\\*).*|.*(\\_\\_.+\\_\\_).*")
 	whitespace, _ = regexp.Compile("^( +)(.*)")
 )
 
@@ -81,6 +82,20 @@ func convert(line string) Line {
 	}
 
 	// inline elements are replaced with HTML in this function.
+	for strong.MatchString(line) {
+		// line[loc[2]:loc[3]]: **<text>**
+		// line[loc[4]:loc[5]]: __<text>__
+		loc := strong.FindStringSubmatchIndex(line)
+		s := loc[2]
+		e := loc[3]
+		if s == -1 && e == -1 {
+			s = loc[4]
+			e = loc[5]
+		}
+		sttag := "<strong>" + line[s+2:e-2] + "</strong>"
+		line = line[:s] + sttag + line[e:]
+	}
+
 	for emphasis.MatchString(line) {
 		// line[loc[2]:loc[3]]: *<text>*
 		// line[loc[4]:loc[5]]: _<text>_
