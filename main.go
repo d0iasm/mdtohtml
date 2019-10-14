@@ -34,19 +34,17 @@ func main() {
 	defer rfile.Close()
 	reader := bufio.NewReader(rfile)
 
-	t := Tokenizer{bufio.NewScanner(reader), "", []Token{}}
-	t.tokenize()
-	tokens := t.getTokens()
-	fmt.Println("TOKENS: ", t.tokens)
-
-	p := Parser{0, tokens}
-	root := p.body()
-	debugTree(root, 0)
-	fmt.Println("NODES: ", root)
-
-	html := generate(root)
-	//fmt.Println("HTML: ", html)
-
-	fmt.Fprintln(writer, html)
+	for {
+		line, _, err := reader.ReadLine()
+		if err != nil { // io.EOF
+			break
+		}
+		html := transpile(line)
+		fmt.Println("---------")
+		fmt.Println(string(line))
+		fmt.Println(html)
+		fmt.Println("---------")
+		writer.WriteString(html)
+	}
 	writer.Flush()
 }

@@ -1,4 +1,4 @@
-files=tokenizer.go parser.go generator.go css.go
+files=regexp.go css.go
 
 mdtohtml: main.go $(files)
 	go build -o mdtohtml main.go $(files)
