@@ -17,7 +17,8 @@ type Type int
 
 // only block elements
 const (
-	P Type = iota
+	Newline Type = iota
+	P
 	H1
 	H2
 	H3
@@ -72,6 +73,11 @@ func hton(ty Type) int {
 }
 
 func convert(line string) Line {
+	// newline
+	if line == "\n" || len(line) == 0 {
+		return Line{Newline, " ", 0}
+	}
+
 	// inline elements are replaced with HTML in this function.
 	for link.MatchString(line) { // links <a href="url">link text</a>
 		//line[loc[2]:loc[3]]: link text

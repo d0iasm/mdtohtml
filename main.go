@@ -40,6 +40,10 @@ func main() {
 		if err != nil { // io.EOF
 			break
 		}
+		// Remove newline at the end of line
+		if len(line) > 1 && line[len(line)-1] == '\n' {
+			line = line[:len(line)-1]
+		}
 		lines = append(lines, convert(line))
 	}
 
