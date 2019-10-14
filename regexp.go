@@ -109,6 +109,13 @@ func transpile(line []byte) Line {
 		copy(line, []byte(newh))
 	}
 
+	// break at the end of line
+	if string(line[len(line)-2:]) == "  " {
+		newbr := string(line[:len(line)-2]) + "<br>"
+		line = make([]byte, len([]byte(newbr)))
+		copy(line, []byte(newbr))
+	}
+
 	// block elements will be replaced with HTML in the generate().
 	if list.Match(line) {
 		//line[loc[2]:loc[3]]: white spaces before "-"

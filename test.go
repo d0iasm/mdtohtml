@@ -20,7 +20,9 @@ func test(expect string, input string) {
 }
 
 func main() {
+	fmt.Println("\n----- paragrah -----")
 	//test("<p>a paragraph</p>", "a paragraph")
+	//test("<p>a paragraph<br>hogehoge</p>", "a paragraph  \nhogehoge")
 
 	fmt.Println("\n----- heading -----")
 	test("<h1>h1</h1>", "# h1")
@@ -55,7 +57,7 @@ func main() {
 	fmt.Println("\n----- link -----")
 	test("<a href=\"http://example.com\">link</a>", "[link](http://example.com)")
 	test("<a href=\"http://example.com\">link(2)</a>", "[link(2)](http://example.com)")
-	//test("inline text<a href=\"http://example.com\">link</a>.", "inline text[link](http://example.com).")
+	test("inline text<a href=\"http://example.com\">link</a>.", "inline text[link](http://example.com).")
 	//test("<p>[dummylink] (http://example.com)</p>", "[dummylink] (http://example.com)")
 
 	fmt.Println("\n----- heading with inline elements -----")
@@ -69,12 +71,12 @@ func main() {
 	fmt.Println("----- heading after a list -----")
 	test("<ul><li>list1</li></ul><h1>h1</h1>", "- list1\n# h1")
 	test("<ul><li>list1</li></ul><h1>h1</h1>", "- list1\n\n# h1")
-        //test("<ul><li>a<ul><li>b</li></ul></li></ul><h1>h1</h1>", "- a\n  - b\n# h1")
+	//test("<ul><li>a<ul><li>b</li></ul></li></ul><h1>h1</h1>", "- a\n  - b\n# h1")
 
-        /**
+	/**
 	fmt.Println("\n----- multiple lines -----")
 	test("<h1>h1</h1><p>text</p>", "# h1\ntext")
-        */
+	*/
 
 	fmt.Println("OK")
 }
