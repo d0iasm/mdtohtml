@@ -33,6 +33,7 @@ func main() {
 	test("<h6>h6</h6>", "###### h6")
 	test("<p>####### h7</p>", "####### h7")
 	test("<p>###dummyh3</p>", "###dummyh3")
+	test("<p>C## is not heading</p>", "C## is not heading")
 
 	fmt.Println("\n----- list -----")
 	test("<ul><li>list1</li></ul>", "- list1")

@@ -8,7 +8,7 @@ import (
 
 var (
 	heading, _    = regexp.Compile("(^#{1,6}) (.+)")
-	headingIn, _  = regexp.Compile("^[^#]+(#{1,6}) (.+)")
+	headingIn, _  = regexp.Compile("^ *- +(#{1,6}) (.+)")
 	list, _       = regexp.Compile("^( *)- (.+)")
 	link, _       = regexp.Compile(".*(\\[.+\\])(\\(.+\\)).*")
 	emphasis, _   = regexp.Compile(".*(\\*.+\\*).*|.*(\\_.+\\_).*")
