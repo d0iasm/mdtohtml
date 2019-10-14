@@ -7,10 +7,11 @@ import (
 )
 
 var (
-	heading, _   = regexp.Compile("(^#{1,6}) (.+)")
-	headingIn, _ = regexp.Compile("^[^#]+(#{1,6}) (.+)")
-	list, _      = regexp.Compile("^( *)- (.+)")
-	link, _      = regexp.Compile(".*(\\[.+\\])(\\(.+\\)).*")
+	heading, _    = regexp.Compile("(^#{1,6}) (.+)")
+	headingIn, _  = regexp.Compile("^[^#]+(#{1,6}) (.+)")
+	list, _       = regexp.Compile("^( *)- (.+)")
+	link, _       = regexp.Compile(".*(\\[.+\\])(\\(.+\\)).*")
+	whitespace, _ = regexp.Compile("^( +)(.*)")
 )
 
 type Type int
@@ -122,6 +123,14 @@ func convert(line string) Line {
 		loc := heading.FindStringSubmatchIndex(line)
 		n := loc[3]
 		return Line{ntoh(n), line[loc[4]:loc[5]], 0}
+	}
+
+	// replace white spaces with a white space at the start of a line
+	if whitespace.MatchString(line) {
+		//line[loc[2]:loc[3]]: whitespace
+		//line[loc[4]:loc[5]]: content
+		loc := whitespace.FindStringSubmatchIndex(line)
+		line = " " + line[loc[4]:loc[5]]
 	}
 	return Line{P, line, 0}
 }

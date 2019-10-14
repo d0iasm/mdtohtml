@@ -37,7 +37,7 @@ func main() {
 	fmt.Println("\n----- list -----")
 	test("<ul><li>list1</li></ul>", "- list1")
 	test("<ul><li>list1</li><li>list2</li></ul>", "- list1\n- list2")
-	// Sublist is not a standard syntax.
+	// TODO: Sublist is not a standard syntax.
 	// It should be <li>list1<ul><li>sublist1</li></ul></li></ul>
 	// but now got <li>list1</li><ul><li>sublist1</li></ul></ul>
 	test("<ul><li>list1</li><ul><li>sublist1</li></ul></ul>", "- list1\n  - sublist1")
@@ -46,8 +46,6 @@ func main() {
 	test("<ul><li>a</li><ul><li>aa</li><ul><li>aaa</li></ul></ul><li>b</li></ul>", "- a\n  - aa\n    - aaa\n- b")
 	test("<ul><li>a</li><ul><li>aa</li><ul><li>aaa</li></ul><li>bb</li></ul></ul>", "- a\n  - aa\n    - aaa\n  - bb")
 	test("<ul><li><h1>h1</h1></li></ul>", "- # h1")
-
-	//Currently, this test fails because "c" is interpreted as a start of a new list, which means <ul>.
 	//test("<ul><li>a -b</li><li>c</li></ul>", "- a\n  -b\n- c")
 
 	fmt.Println("\n----- link -----")
@@ -63,6 +61,7 @@ func main() {
 	fmt.Println("\n----- list with inline elements -----")
 	test("<ul><li><a href=\"http://example.com\">link</a></li></ul>", "- [link](http://example.com)")
 	test("<ul><li>This is <a href=\"http://example.com\">link</a> list.</li></ul>", "- This is [link](http://example.com) list.")
+	test("<ul><li><h1>h1</h1></li></ul>", "- # h1")
 
 	fmt.Println("\n----- heading after a list -----")
 	test("<ul><li>list1</li></ul><h1>h1</h1>", "- list1\n# h1")

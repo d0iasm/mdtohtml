@@ -11,6 +11,11 @@ func generate(lines []Line) string {
 		fmt.Println(i, l)
 		switch l.ty {
 		case P:
+			if (i > 0 && lines[i-1].ty == Li) && (i < len(lines)-1 && lines[i+1].ty == Li) {
+				html += l.val
+				continue
+			}
+
 			if (i > 0 && lines[i-1].ty != P) || i == 0 {
 				html += "<p>"
 			}
@@ -59,7 +64,7 @@ func generate(lines []Line) string {
 			}
 		default:
 			// insert a white space in a paragraph
-			if (i > 0 && lines[len(lines)-1].ty == P) && (i < len(lines) && lines[len(lines)+1].ty == P) {
+			if (i > 0 && lines[i-1].ty == P) && (i < len(lines)-1 && lines[i+1].ty == P) {
 				html += l.val
 			}
 		}
