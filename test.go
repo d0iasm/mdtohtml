@@ -71,5 +71,9 @@ func main() {
 	fmt.Println("\n----- multiple lines -----")
 	test("<h1>h1</h1><p>text</p>", "# h1\ntext")
 
+	fmt.Println("\n----- emphasis -----")
+	test("<p><em>emphasis</em></p>", "*emphasis*")
+	test("<p><em>emphasis</em></p>", "_emphasis_")
+
 	fmt.Println("OK")
 }

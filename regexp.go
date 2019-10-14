@@ -11,6 +11,7 @@ var (
 	headingIn, _  = regexp.Compile("^[^#]+(#{1,6}) (.+)")
 	list, _       = regexp.Compile("^( *)- (.+)")
 	link, _       = regexp.Compile(".*(\\[.+\\])(\\(.+\\)).*")
+	emphasis, _   = regexp.Compile(".*(\\*.+\\*).*|.*(\\_.+\\_).*")
 	whitespace, _ = regexp.Compile("^( +)(.*)")
 )
 
@@ -80,6 +81,20 @@ func convert(line string) Line {
 	}
 
 	// inline elements are replaced with HTML in this function.
+	for emphasis.MatchString(line) {
+		// line[loc[2]:loc[3]]: *<text>*
+		// line[loc[4]:loc[5]]: _<text>_
+		loc := emphasis.FindStringSubmatchIndex(line)
+		s := loc[2]
+		e := loc[3]
+		if s == -1 && e == -1 {
+			s = loc[4]
+			e = loc[5]
+		}
+		emtag := "<em>" + line[s+1:e-1] + "</em>"
+		line = line[:s] + emtag + line[e:]
+	}
+
 	for link.MatchString(line) { // links <a href="url">link text</a>
 		//line[loc[2]:loc[3]]: link text
 		//line[loc[4]:loc[5]]: url
