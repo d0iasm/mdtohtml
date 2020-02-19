@@ -62,6 +62,8 @@ func generate(lines []Line) string {
 			if i < len(lines)-1 && lines[i+1].ty != Li || i == len(lines)-1 {
 				html += "</ul>"
 			}
+		case Hr:
+			html += "<hr>"
 		default:
 			// insert a white space in a paragraph
 			if (i > 0 && lines[i-1].ty == P) && (i < len(lines)-1 && lines[i+1].ty == P) {

@@ -13,6 +13,7 @@ var (
 	link, _       = regexp.Compile(".*(\\[.+\\])(\\(.+\\)).*")
 	emphasis, _   = regexp.Compile(".*(\\*.+\\*).*|.*(\\_.+\\_).*")
 	strong, _     = regexp.Compile(".*(\\*\\*.+\\*\\*).*|.*(\\_\\_.+\\_\\_).*")
+	horizontal, _ = regexp.Compile("^-{3}|_{3}|\\*{3}")
 	whitespace, _ = regexp.Compile("^( +)(.*)")
 )
 
@@ -29,6 +30,7 @@ const (
 	H5
 	H6
 	Li
+	Hr
 )
 
 type Line struct {
@@ -80,6 +82,8 @@ func convert(line string) Line {
 	if line == "\n" || len(line) == 0 {
 		return Line{Newline, " ", 0}
 	}
+
+	// ----- Inline Elements -----
 
 	// inline elements are replaced with HTML in this function.
 	for strong.MatchString(line) {
@@ -138,6 +142,16 @@ func convert(line string) Line {
 		line = line[:len(line)-2] + "<br>"
 	}
 
+	// replace white spaces with a white space at the start of a line
+	if whitespace.MatchString(line) {
+		//line[loc[2]:loc[3]]: whitespace
+		//line[loc[4]:loc[5]]: content
+		loc := whitespace.FindStringSubmatchIndex(line)
+		line = " " + line[loc[4]:loc[5]]
+	}
+
+	// ----- Block Elements -----
+
 	// block elements will be replaced with HTML in the generate().
 	if list.MatchString(line) {
 		//line[loc[2]:loc[3]]: white spaces before "-"
@@ -155,12 +169,9 @@ func convert(line string) Line {
 		return Line{ntoh(n), line[loc[4]:loc[5]], 0}
 	}
 
-	// replace white spaces with a white space at the start of a line
-	if whitespace.MatchString(line) {
-		//line[loc[2]:loc[3]]: whitespace
-		//line[loc[4]:loc[5]]: content
-		loc := whitespace.FindStringSubmatchIndex(line)
-		line = " " + line[loc[4]:loc[5]]
+	if horizontal.MatchString(line) {
+		return Line{Hr, "", 0}
 	}
+
 	return Line{P, line, 0}
 }
