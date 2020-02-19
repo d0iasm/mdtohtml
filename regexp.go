@@ -142,14 +142,6 @@ func convert(line string) Line {
 		line = line[:len(line)-2] + "<br>"
 	}
 
-	// replace white spaces with a white space at the start of a line
-	if whitespace.MatchString(line) {
-		//line[loc[2]:loc[3]]: whitespace
-		//line[loc[4]:loc[5]]: content
-		loc := whitespace.FindStringSubmatchIndex(line)
-		line = " " + line[loc[4]:loc[5]]
-	}
-
 	// ----- Block Elements -----
 
 	// block elements will be replaced with HTML in the generate().
@@ -171,6 +163,14 @@ func convert(line string) Line {
 
 	if horizontal.MatchString(line) {
 		return Line{Hr, "", 0}
+	}
+
+	// replace white spaces with a white space at the start of a line
+	if whitespace.MatchString(line) {
+		//line[loc[2]:loc[3]]: whitespace
+		//line[loc[4]:loc[5]]: content
+		loc := whitespace.FindStringSubmatchIndex(line)
+		line = " " + line[loc[4]:loc[5]]
 	}
 
 	return Line{P, line, 0}
