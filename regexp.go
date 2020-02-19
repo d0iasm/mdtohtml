@@ -85,61 +85,69 @@ func convert(line string) Line {
 
 	// ----- Inline Elements -----
 
-	// inline elements are replaced with HTML in this function.
-	for strong.MatchString(line) {
-		// line[loc[2]:loc[3]]: **<text>**
-		// line[loc[4]:loc[5]]: __<text>__
-		loc := strong.FindStringSubmatchIndex(line)
-		s := loc[2]
-		e := loc[3]
-		if s == -1 && e == -1 {
-			s = loc[4]
-			e = loc[5]
+	match_something := true
+	for match_something {
+		// inline elements are replaced with HTML in this function.
+		for strong.MatchString(line) {
+			// line[loc[2]:loc[3]]: **<text>**
+			// line[loc[4]:loc[5]]: __<text>__
+			loc := strong.FindStringSubmatchIndex(line)
+			s := loc[2]
+			e := loc[3]
+			if s == -1 && e == -1 {
+				s = loc[4]
+				e = loc[5]
+			}
+			sttag := "<strong>" + line[s+2:e-2] + "</strong>"
+			line = line[:s] + sttag + line[e:]
+			continue
 		}
-		sttag := "<strong>" + line[s+2:e-2] + "</strong>"
-		line = line[:s] + sttag + line[e:]
-	}
 
-	for emphasis.MatchString(line) {
-		// line[loc[2]:loc[3]]: *<text>*
-		// line[loc[4]:loc[5]]: _<text>_
-		loc := emphasis.FindStringSubmatchIndex(line)
-		s := loc[2]
-		e := loc[3]
-		if s == -1 && e == -1 {
-			s = loc[4]
-			e = loc[5]
+		for emphasis.MatchString(line) {
+			// line[loc[2]:loc[3]]: *<text>*
+			// line[loc[4]:loc[5]]: _<text>_
+			loc := emphasis.FindStringSubmatchIndex(line)
+			s := loc[2]
+			e := loc[3]
+			if s == -1 && e == -1 {
+				s = loc[4]
+				e = loc[5]
+			}
+			emtag := "<em>" + line[s+1:e-1] + "</em>"
+			line = line[:s] + emtag + line[e:]
+			continue
 		}
-		emtag := "<em>" + line[s+1:e-1] + "</em>"
-		line = line[:s] + emtag + line[e:]
-	}
 
-	for link.MatchString(line) { // links <a href="url">link text</a>
-		//line[loc[2]:loc[3]]: link text
-		//line[loc[4]:loc[5]]: url
-		loc := link.FindStringSubmatchIndex(line)
+		for link.MatchString(line) { // links <a href="url">link text</a>
+			//line[loc[2]:loc[3]]: link text
+			//line[loc[4]:loc[5]]: url
+			loc := link.FindStringSubmatchIndex(line)
 
-		text := line[loc[2]+1 : loc[3]-1]
-		url := line[loc[4]+1 : loc[5]-1]
+			text := line[loc[2]+1 : loc[3]-1]
+			url := line[loc[4]+1 : loc[5]-1]
 
-		litag := "<a href=\"" + url + "\">" + text + "</a>"
-		line = line[:loc[2]] + litag + line[loc[5]:]
-	}
+			litag := "<a href=\"" + url + "\">" + text + "</a>"
+			line = line[:loc[2]] + litag + line[loc[5]:]
+			continue
+		}
 
-	// heading existing in another component
-	if headingIn.MatchString(line) {
-		//line[loc[2]:loc[3]]: #, ##, ..., or ######
-		//line[loc[4]:loc[5]]: title
-		loc := headingIn.FindStringSubmatchIndex(line)
+		// heading existing in another component
+		if headingIn.MatchString(line) {
+			//line[loc[2]:loc[3]]: #, ##, ..., or ######
+			//line[loc[4]:loc[5]]: title
+			loc := headingIn.FindStringSubmatchIndex(line)
 
-		n := loc[3] - loc[2] // heading number
-		htag := "<h" + strconv.Itoa(n) + ">" + line[loc[4]:loc[5]] + "</h" + strconv.Itoa(n) + ">"
-		line = line[:loc[2]] + htag
-	}
+			n := loc[3] - loc[2] // heading number
+			htag := "<h" + strconv.Itoa(n) + ">" + line[loc[4]:loc[5]] + "</h" + strconv.Itoa(n) + ">"
+			line = line[:loc[2]] + htag
+			continue
+		}
 
-	// break at the end of line
-	if len(line) > 2 && line[len(line)-2:] == "  " {
-		line = line[:len(line)-2] + "<br>"
+		// break at the end of line
+		if len(line) > 2 && line[len(line)-2:] == "  " {
+			line = line[:len(line)-2] + "<br>"
+		}
+		match_something = false
 	}
 
 	// ----- Block Elements -----
