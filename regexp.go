@@ -10,7 +10,7 @@ var (
 	heading, _    = regexp.Compile("(^#{1,6}) (.+)")
 	headingIn, _  = regexp.Compile("^ *- +(#{1,6}) (.+)")
 	list, _       = regexp.Compile("^( *)- (.+)")
-	link, _       = regexp.Compile(".*(\\[.+\\])(\\(.+\\)).*")
+	link, _       = regexp.Compile(".*(\\[.+?\\])(\\(.+?\\)).*")
 	emphasis, _   = regexp.Compile(".*(\\*.+\\*).*|.*(\\_.+\\_).*")
 	strong, _     = regexp.Compile(".*(\\*\\*.+\\*\\*).*|.*(\\_\\_.+\\_\\_).*")
 	horizontal, _ = regexp.Compile("^-{3}|_{3}|\\*{3}")
@@ -128,6 +128,10 @@ func convert(line string) Line {
 
 			litag := "<a href=\"" + url + "\">" + text + "</a>"
 			line = line[:loc[2]] + litag + line[loc[5]:]
+                        fmt.Println(loc)
+                        fmt.Println(text)
+                        fmt.Println(url)
+                        fmt.Println(line)
 			continue
 		}
 
