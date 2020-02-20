@@ -7,12 +7,14 @@ func css() string {
 body {
   font-family: 'Noto Sans JP', sans-serif;
   font-size: 16px;
+  text-size-adjust: none;
   max-width: 680px;
   margin: 30px auto 0 auto;
 }
 @media (max-width: 980px) {
   body {
     max-width: 90%;
+    font-size: 2em;
   }
 }
 h1, h2, h3, h4, h5, h6 {
